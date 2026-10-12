@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>맞춤 장소 탐색 · 와이어프레임</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stage">
+  <aside class="panel" id="panel" aria-label="화면 목록"></aside>
+  <div class="phone" id="phone">
+    <div class="st"></div>
+    <header class="hd" id="hd"></header>
+    <main class="view" id="view" tabindex="-1"></main>
+    <div class="toast" id="toast" hidden></div>
+    <button class="top" id="top" data-act="top" hidden aria-label="맨 위로">↑<br>TOP</button>
+    <nav class="bn" id="bn" aria-label="하단 메뉴"></nav>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
