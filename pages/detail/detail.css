@@ -1,0 +1,7 @@
+.photo{height:150px}
+.tags{margin-top:8px}
+.map{height:130px;background:var(--soft);border-radius:var(--r-sm);display:grid;place-items:center;color:var(--sub);font-size:13px;position:relative;overflow:hidden}
+.map::before,.map::after{content:'';position:absolute;background:var(--line)}
+.map::before{left:30%;top:0;bottom:0;width:14px}
+.map::after{top:55%;left:0;right:0;height:14px}
+.map span{position:relative;z-index:1;background:var(--soft);padding:2px 8px;border-radius:6px}

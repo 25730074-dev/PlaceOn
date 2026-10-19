@@ -1,0 +1,27 @@
+.home{position:absolute;inset:0;overflow:hidden;--sh:170px}
+.homemap{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab;background:#eaeeec;user-select:none}
+.homemap:active{cursor:grabbing}
+#world{position:absolute;left:0;top:0;width:1000px;height:1000px;transform-origin:0 0;will-change:transform}
+#world svg{display:block;pointer-events:none}
+
+/* 핀·내 위치는 줌과 무관하게 화면에서 같은 크기 */
+.pin{position:absolute;z-index:3;transform:translate(-50%,-100%) scale(calc(1 / var(--k,1)));transform-origin:50% 100%;border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:1px}
+.pin small,.me small{font-size:11px;font-weight:700;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:0 6px;white-space:nowrap}
+.me{position:absolute;left:500px;top:500px;z-index:2;width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 8px rgba(37,99,235,.22);transform:translate(-50%,-50%) scale(calc(1 / var(--k,1)))}
+.me small{position:absolute;top:28px;left:50%;transform:translateX(-50%)}
+
+.maptop{position:absolute;top:10px;left:10px;right:10px;z-index:5;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.maptop>*{pointer-events:auto;align-self:flex-start}
+.maptop .chip,.pill{box-shadow:0 2px 8px rgba(28,35,48,.14)}
+.pill{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:700}
+
+.ctrl{position:absolute;right:10px;bottom:calc(var(--sh) + 12px);z-index:5;display:flex;flex-direction:column;gap:6px;transition:opacity .2s}
+.ctrl button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:18px;box-shadow:0 2px 8px rgba(28,35,48,.14)}
+.home.max .ctrl{opacity:0;pointer-events:none}
+
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;height:170px;background:var(--surface);border-radius:18px 18px 0 0;box-shadow:0 -4px 20px rgba(28,35,48,.2);display:flex;flex-direction:column}
+.drag{touch-action:none;cursor:grab;flex:none}
+.grab{padding:10px 0 8px;display:grid;place-items:center}
+.grab i{width:40px;height:4px;border-radius:2px;background:var(--line)}
+.sheet-head{padding:0 20px 10px}
+.sheet-list{flex:1;overflow-y:auto;padding:4px 20px 20px}

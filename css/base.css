@@ -1,0 +1,35 @@
+/* 디자인 토큰 · 리셋 · 폰 프레임 · 앱바 · 탭바 */
+:root{
+  --bg:#e9edf1; --surface:#fff; --soft:#f3f5f7; --line:#d5dae1;
+  --ink:#1c2330; --sub:#5d6675; --accent:#0f6b66; --accent-soft:#dcefed; --danger:#b3372b;
+  --r-sm:8px; --r-md:12px;
+  --font:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);display:flex;justify-content:center;align-items:center;font-size:15px;line-height:1.5}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+hr{border:0;border-top:1px solid var(--line)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.phone{width:390px;height:min(820px,100vh);background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 12px 40px rgba(28,35,48,.14)}
+@media(max-width:430px){.phone{width:100vw;height:100vh;border:0}}
+.status{display:flex;justify-content:space-between;padding:10px 24px 4px;font-weight:700;font-size:13px}
+
+.appbar{display:flex;align-items:center;gap:10px;padding:10px 20px 12px;border-bottom:1px solid var(--line);min-height:52px}
+.appbar h1{font-size:18px;flex:1}
+.appbar .brand{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.appbar .brand i{font-style:normal;color:var(--accent)}
+.appbar .link{text-decoration:none;color:var(--sub);font-size:14px}
+.appbar .back{font-size:20px;color:var(--ink)}
+.appbar .close{font-size:22px}
+.grow{flex:1}
+
+#content{flex:1;overflow-y:auto;padding:20px}
+#content.full{padding:0;overflow:hidden;position:relative}
+
+.tabbar{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.tabbar button{border:0;background:none;padding:10px 0 12px;font-size:12px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px}
+.tabbar button.on{background:var(--soft);color:var(--ink);font-weight:700}
+.home-bar{height:5px;width:130px;background:var(--ink);border-radius:3px;margin:6px auto 8px;flex:none}

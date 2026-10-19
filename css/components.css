@@ -1,0 +1,52 @@
+/* 범용 컴포넌트: Button · Chip · Card · Field · Badge · Toast ... */
+.btn{display:block;width:100%;padding:13px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);font-weight:600;text-align:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:disabled{background:var(--line);border-color:var(--line);color:var(--sub);cursor:not-allowed}
+.btn.sm{width:auto;padding:7px 14px;font-size:13px}
+.link{background:none;border:0;color:var(--sub);text-decoration:underline;font-size:13px;padding:0}
+
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm);padding:7px 13px;font-size:14px}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+.chip.on::before{content:'✓ '}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:2px 9px;font-size:13px;background:var(--surface)}
+
+.card{border:1px solid var(--line);border-radius:var(--r-md);padding:14px;background:var(--surface)}
+.card.clickable{cursor:pointer}
+.note{background:var(--soft);border-radius:var(--r-sm);padding:12px;font-size:13px;color:var(--sub);white-space:pre-line}
+.thumb{background:var(--soft);border-radius:var(--r-sm);display:grid;place-items:center;color:var(--sub);font-size:12px;text-align:center}
+
+.stack>*+*{margin-top:14px}
+.sec{font-size:15px;font-weight:700;margin-bottom:8px}
+.sec.lg{font-size:18px}
+h2{font-size:25px;line-height:1.3;letter-spacing:-.02em}
+h2.sm{font-size:22px}
+.sub{color:var(--sub);font-size:14px}
+.small{font-size:12px}
+.err{color:var(--danger);font-size:12px;min-height:16px;margin-top:4px}
+
+.field{display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 12px;background:var(--surface)}
+.field:focus-within{border-color:var(--accent)}
+.field.strong{border-color:var(--ink)}
+.field input{flex:1;border:0;outline:0;padding:13px 0;background:none;min-width:0}
+.field button{border:0;background:none;color:var(--sub);font-size:13px}
+label.lab{display:block;font-weight:700;margin:0 0 6px}
+
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--ink);border-radius:var(--r-sm);overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:10px 0;font-size:14px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--ink);color:#fff;font-weight:700}
+
+/* 장소 카드 */
+.place{display:flex;gap:12px}
+.place .thumb{width:84px;height:84px;flex:none}
+.place .body{flex:1;min-width:0}
+.place h3{font-size:16px}
+.place-top{display:flex;justify-content:space-between}
+.place .acts{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.save{border:0;background:none;font-size:20px;line-height:1;opacity:.35}
+.save.on{opacity:1}
+
+.empty{text-align:center;padding:28px 10px;color:var(--sub)}
+.empty b{display:block;color:var(--ink);margin-bottom:4px}
+.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:20px;font-size:13px;z-index:9;white-space:nowrap}

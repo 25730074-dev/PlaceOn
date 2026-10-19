@@ -1,0 +1,15 @@
+<!-- 공용 템플릿: 앱 시작 시 body 에 삽입됩니다. 복제는 js/core/ui.js 의 clone(id) -->
+<template id="t-place-card">
+  <article class="card place clickable">
+    <div class="thumb">🖼</div>
+    <div class="body">
+      <div class="place-top"><h3 data-f="name"></h3><button class="save" data-f="save" aria-label="즐겨찾기">🔖</button></div>
+      <div class="sub" data-f="meta"></div>
+      <div class="sub" data-f="tags"></div>
+    </div>
+  </article>
+</template>
+
+<template id="t-empty">
+  <div class="empty"><b data-f="title"></b><span data-f="sub"></span></div>
+</template>

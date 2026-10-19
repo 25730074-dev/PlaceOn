@@ -1,0 +1,19 @@
+<div class="stack">
+  <form class="field strong" novalidate>
+    <span>🔍</span>&nbsp;
+    <input name="q" placeholder="키워드, 지명 또는 장소명" autocomplete="off">
+    <button type="button" data-act="clear" aria-label="지우기">✕</button>
+  </form>
+  <div class="err" data-slot="err"></div>
+  <div class="row" data-slot="modes"></div>
+  <div class="note" data-slot="note"></div>
+  <div class="bar">
+    <div class="sec" data-slot="count"></div>
+    <button class="btn sm" data-nav="#/filter" data-slot="filterBtn"></button>
+  </div>
+  <div class="stack" data-slot="list"></div>
+  <div class="card">
+    <b>지명·장소명 검색으로 전환하면</b>
+    <p class="sub">‘성수동’ → 성수동 기준 추천<br>장소명 → 해당 장소가 속한 지역 기준 추천<br>결과 예시: 골목 책방 · 금호동 기준</p>
+  </div>
+</div>

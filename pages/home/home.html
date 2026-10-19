@@ -1,0 +1,45 @@
+<div class="home">
+  <div class="homemap">
+    <div id="world">
+      <svg width="1000" height="1000" viewBox="0 0 1000 1000" aria-hidden="true">
+        <rect width="1000" height="1000" fill="#eaeeec"/>
+        <path d="M0 880C250 820 400 940 650 860S900 800 1000 840V1000H0Z" fill="#cfe3ee"/>
+        <rect x="640" y="620" width="260" height="190" rx="24" fill="#d3e8d6"/>
+        <path d="M0 0V1000M114 0V1000M205 0V1000M319 0V1000M410 0V1000M501 0V1000M615 0V1000M706 0V1000M820 0V1000M911 0V1000M1002 0V1000
+                 M0 0H1000M0 114H1000M0 205H1000M0 319H1000M0 410H1000M0 501H1000M0 615H1000M0 706H1000M0 820H1000M0 911H1000M0 1002H1000"
+              stroke="#fff" stroke-width="9" fill="none"/>
+        <path d="M0 250L1000 650M200 0L760 1000" stroke="#fff" stroke-width="18" fill="none"/>
+      </svg>
+      <div class="me"><small>내 위치</small></div>
+      <div data-slot="pins"></div>
+    </div>
+  </div>
+
+  <div class="maptop">
+    <span class="pill">📍 현재 위치 <span data-slot="area"></span> 기준</span>
+    <div class="row" data-slot="cats"></div>
+  </div>
+
+  <div class="ctrl">
+    <button data-z="in" aria-label="확대">＋</button>
+    <button data-z="out" aria-label="축소">－</button>
+    <button data-z="me" aria-label="내 위치로">◎</button>
+  </div>
+
+  <section class="sheet">
+    <div class="drag">
+      <div class="grab"><i></i></div>
+      <div class="sheet-head">
+        <div class="sec">내 취향 맞춤 추천 <span class="sub" data-slot="count"></span></div>
+        <p class="sub small" data-slot="prefs"></p>
+      </div>
+    </div>
+    <div class="sheet-list stack" data-slot="list"></div>
+  </section>
+</div>
+
+<template id="t-pin">
+  <button class="pin"><small data-f="name"></small>
+    <svg width="22" height="28" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.2 0 11.7 0 20 12 30 12 30s12-10 12-18.3C24 5.2 18.6 0 12 0z" fill="#0f6b66"/><circle cx="12" cy="11.5" r="4.5" fill="#fff"/></svg>
+  </button>
+</template>

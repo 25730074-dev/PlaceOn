@@ -1,0 +1,19 @@
+<div class="stack">
+  <div class="thumb photo">🖼 장소 이미지</div>
+  <div>
+    <h2 data-slot="name"></h2>
+    <p class="sub" data-slot="meta"></p>
+    <div class="row tags" data-slot="tags"></div>
+  </div>
+  <p data-slot="desc"></p>
+  <hr>
+  <div>
+    <div class="sec">장소 정보</div>
+    <p><b>주소</b>&nbsp; <span data-slot="address"></span></p>
+    <p><b>운영</b>&nbsp; <span data-slot="hours"></span></p>
+    <p><b>시설</b>&nbsp; <span data-slot="facilities"></span></p>
+  </div>
+  <div class="map"><span>📍 장소 위치 지도 영역</span></div>
+  <button class="btn primary" data-act="route">🧭 길찾기</button>
+  <button class="btn" data-slot="save"></button>
+</div>
