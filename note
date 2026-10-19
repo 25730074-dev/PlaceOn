@@ -7,5 +7,13 @@ https://www.octoparse.kr/blog/get-store-data-from-naver-map
 네이버 지도 방문자 리뷰 스크래퍼
 https://www.octoparse.kr/template/naver-map-review-scraper
 
-실시간 지도(사용자 위치) - 카카오맵 api 사용
-300개 json 데이터 / 카카오맵 api?
+지도 API: 카카오맵 JavaScript API
+  ㄴ 지도 표시 기능 구현
+현재 위치: 브라우저 Geolocation API
+  ㄴ 사용자 현재 좌표 가져오기
+장소 데이터: 카카오 로컬 API
+  ㄴ 장소명, 주소, 좌표, 카테고리 등의 데이터를 활용해 현재 위치 주변의 장소 정보를 검색
+JSON 데이터
+  ㄴ 세부 취향 태그 관리?
+
+데이터 관리 방향성 고민
