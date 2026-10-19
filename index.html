@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlaceON · 취향 기반 장소 추천 목업</title>
+<style>
+:root{
+  --bg:#e9edf1; --surface:#fff; --soft:#f3f5f7; --line:#d5dae1;
+  --ink:#1c2330; --sub:#5d6675; --accent:#0f6b66; --accent-soft:#dcefed; --danger:#b3372b;
+  --r-sm:8px; --r-md:12px;
+  --font:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);display:flex;justify-content:center;align-items:center;font-size:15px;line-height:1.5}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* 폰 프레임 */
+.phone{width:390px;height:min(820px,100vh);background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 12px 40px rgba(28,35,48,.14)}
+@media(max-width:430px){.phone{width:100vw;height:100vh;border:0}}
+.status{display:flex;justify-content:space-between;padding:10px 24px 4px;font-weight:700;font-size:13px}
+.appbar{display:flex;align-items:center;gap:10px;padding:10px 20px 12px;border-bottom:1px solid var(--line);min-height:52px}
+.appbar h1{font-size:18px;flex:1}
+.appbar .brand{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.appbar .brand i{font-style:normal;color:var(--accent)}
+#content{flex:1;overflow-y:auto;padding:20px}
+.tabbar{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.tabbar button{border:0;background:none;padding:10px 0 12px;font-size:12px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px}
+.tabbar button.on{background:var(--soft);color:var(--ink);font-weight:700}
+.home-bar{height:5px;width:130px;background:var(--ink);border-radius:3px;margin:6px auto 8px;flex:none}
+
+/* 범용 컴포넌트 */
+.btn{display:block;width:100%;padding:13px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);font-weight:600;text-align:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:disabled{background:var(--line);border-color:var(--line);color:var(--sub);cursor:not-allowed}
+.btn.sm{width:auto;padding:7px 14px;font-size:13px}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.link{background:none;border:0;color:var(--sub);text-decoration:underline;font-size:13px;padding:0}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm);padding:7px 13px;font-size:14px}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+.chip.on::before{content:'✓ '}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.card{border:1px solid var(--line);border-radius:var(--r-md);padding:14px;background:var(--surface)}
+.card.clickable{cursor:pointer}
+.note{background:var(--soft);border-radius:var(--r-sm);padding:12px;font-size:13px;color:var(--sub)}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:2px 9px;font-size:13px;background:var(--surface)}
+.thumb{background:var(--soft);border-radius:var(--r-sm);display:grid;place-items:center;color:var(--sub);font-size:12px;text-align:center}
+.stack>*+*{margin-top:14px}
+.sec{font-size:15px;font-weight:700;margin-bottom:8px}
+h2{font-size:25px;line-height:1.3;letter-spacing:-.02em}
+.sub{color:var(--sub);font-size:14px}
+.err{color:var(--danger);font-size:12px;min-height:16px;margin-top:4px}
+.ok{color:var(--accent)}
+.field{display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 12px;background:var(--surface)}
+.field:focus-within{border-color:var(--accent)}
+.field input{flex:1;border:0;outline:0;padding:13px 0;background:none;min-width:0}
+.field button{border:0;background:none;color:var(--sub);font-size:13px}
+label.lab{display:block;font-weight:700;margin:14px 0 6px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--ink);border-radius:var(--r-sm);overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:10px 0;font-size:14px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--ink);color:#fff;font-weight:700}
+.place{display:flex;gap:12px}
+.place .thumb{width:84px;height:84px;flex:none}
+.place .body{flex:1;min-width:0}
+.place h3{font-size:16px}
+.place .acts{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.save{border:0;background:none;font-size:20px;line-height:1;color:var(--sub)}
+.save.on{color:var(--accent)}
+.map{height:130px;background:var(--soft);border-radius:var(--r-sm);display:grid;place-items:center;color:var(--sub);font-size:13px;position:relative;overflow:hidden}
+.map::before,.map::after{content:'';position:absolute;background:var(--line)}
+.map::before{left:30%;top:0;bottom:0;width:14px}.map::after{top:55%;left:0;right:0;height:14px}
+.map span{position:relative;z-index:1;background:var(--soft);padding:2px 8px;border-radius:6px}
+.empty{text-align:center;padding:28px 10px;color:var(--sub)}
+.empty b{display:block;color:var(--ink);margin-bottom:4px}
+.feat{display:flex;gap:12px;margin-top:12px}.feat b{display:block}
+.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:20px;font-size:13px;z-index:9;white-space:nowrap}
+.modal{position:absolute;inset:0;background:rgba(28,35,48,.45);display:grid;place-items:center;z-index:8;padding:24px}
+.modal .card{width:100%}
+.spin{opacity:.7;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span><span>●●●● ▮</span></div>
+  <header class="appbar" id="appbar"></header>
+  <main id="content"></main>
+  <nav class="tabbar" id="tabbar" hidden></nav>
+  <div class="home-bar"></div>
+</div>
+
+<!-- 데이터: 별도 파일로 분리 시 data.json 으로 옮기고 fetch('data.json') 사용 (GitHub Pages 등 서버 환경) -->
+<script type="application/json" id="data">
+{
+  "places":[
+    {"id":"p1","name":"모퉁이 카페","category":"카페","area":"성수동","dist":"50m","distM":50,"walk":"도보 1분","conds":["조용한 공간","혼자 방문"],"tags":["조용한 공간","혼자 방문"],"address":"서울 성동구 성수동 연무장길 12","hours":"매일 10:00 – 21:00 (연중무휴)","facilities":"1인 좌석 · 콘센트 · 무료 와이파이","desc":"골목 안쪽에 자리한 아담한 카페예요. 조용한 분위기라 책을 읽거나 혼자만의 시간을 보내기 좋아요."},
+    {"id":"p2","name":"창가 카페","category":"카페","area":"송정동","dist":"600m","distM":600,"walk":"도보 8분","conds":["조용한 공간"],"tags":["창가 좌석","편안한 분위기"],"address":"서울 성동구 송정동 송정길 24","hours":"화~일 09:30 – 20:00 (월요일 휴무)","facilities":"창가 좌석 · 테라스 · 콘센트","desc":"큰 창으로 햇살이 들어오는 카페예요. 창가 자리에서 편하게 쉬어 가기 좋아요."},
+    {"id":"p3","name":"동네 커피집","category":"카페","area":"용답동","dist":"900m","distM":900,"walk":"도보 12분","conds":["주차 가능"],"tags":["작은 공간","대화하기 좋은 곳"],"address":"서울 성동구 용답동 용답중앙길 58","hours":"매일 08:00 – 22:00","facilities":"주차 2대 · 단체석 · 무료 와이파이","desc":"동네 사람들이 자주 찾는 작은 커피집이에요. 주차가 가능하고 가볍게 대화하기 좋아요."},
+    {"id":"p4","name":"작은 숲 공원","category":"공원","area":"행당동","dist":"1.2km","distM":1200,"walk":"도보 16분","conds":["야외 공간"],"tags":["가벼운 산책","야외 공간"],"address":"서울 성동구 행당동 행당로 77","hours":"상시 개방 (05:00 – 24:00)","facilities":"산책로 · 벤치 · 화장실 · 야외 운동기구","desc":"나무가 우거진 작은 공원이에요. 가볍게 산책하거나 벤치에서 쉬어 가기 좋아요."},
+    {"id":"p5","name":"골목 책방","category":"책방","area":"금호동","dist":"1.8km","distM":1800,"walk":"도보 24분","conds":["조용한 공간","혼자 방문"],"tags":["작은 서점","쉬어 가는 공간"],"address":"서울 성동구 금호동 금호로 19","hours":"월~토 11:00 – 20:00 (일요일 휴무)","facilities":"독서 공간 · 소규모 북토크 · 음료 판매","desc":"작은 서점과 독서 공간이 함께 있는 책방이에요. 조용히 책을 고르며 쉬어 가기 좋아요."}
+  ],
+  "categories":["카페","음식점","공원","책방","문화공간"],
+  "conditions":["조용한 공간","혼자 방문","야외 공간","주차 가능"],
+  "intro":[
+    {"icon":"📍","title":"가까운 장소 추천","text":"현재 위치 주변의 장소를 살펴보세요."},
+    {"icon":"⚙","title":"내 취향에 맞게 검색","text":"키워드 또는 지역과 조건으로 찾아보세요."},
+    {"icon":"🔖","title":"마음에 드는 장소 저장","text":"즐겨찾기와 최근 본 장소를 모아보세요."}
+  ]
+}
+</script>
+
+<script>
+/* ============ 데이터 / 상태 ============ */
+const DB = JSON.parse(document.getElementById('data').textContent);
+const $ = s => document.querySelector(s);
+const place = id => DB.places.find(p => p.id === id);
+const DEFAULT_FILTERS = () => ({radiusKm:1, category:'', conditions:[]});
+
+const S = {
+  user:null,
+  saved:new Set(['p1','p5']),
+  history:[{id:'p1',at:Date.now()},{id:'p4',at:Date.now()-3600e3*2},{id:'p5',at:Date.now()-86400e3}],
+  prefs:{cats:['카페','책방'], conds:['조용한 공간','혼자 방문'], extra:'창가 좌석이 있는 곳'},
+  draftPrefs:null, dirty:false,
+  nearbyCat:'',
+  search:{query:'카페', mode:'keyword'},
+  applied:DEFAULT_FILTERS(), draft:DEFAULT_FILTERS(),
+  favCat:'', section:'prefs',
+  login:{email:'',pw:'',show:false,busy:false,err:{}},
+  signup:{email:'',pw:'',pw2:'',terms:false,priv:false,state:'idle'},
+  detailFrom:'#/nearby', area:'성수동'
+};
+
+/* ============ 유틸 ============ */
+const chipHtml = (label, on, attrs) => `<button class="chip ${on?'on':''}" ${attrs}>${label}</button>`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtTime = t => new Date(t).toLocaleTimeString('ko-KR',{hour:'numeric',minute:'2-digit'});
+const isToday = t => new Date(t).toDateString() === new Date().toDateString();
+const emailOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const pwOk = v => v.length >= 8 && /[A-Za-z]/.test(v) && /\d/.test(v);
+function toast(msg){
+  const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  $('.phone').append(t); setTimeout(()=>t.remove(),1800);
+}
+function toggleIn(arr, v){ return arr.includes(v) ? arr.filter(x=>x!==v) : [...arr, v]; }
+const filterCount = f => f.conditions.length + (f.category?1:0);
+
+/* 장소 카드 (범용) */
+function placeCard(p, {sub, extra=''} = {}){
+  return `<article class="card place clickable" data-go-place="${p.id}">
+    <div class="thumb">🖼</div>
+    <div class="body">
+      <div style="display:flex;justify-content:space-between"><h3>${p.name}</h3>
+        <button class="save ${S.saved.has(p.id)?'on':''}" data-save="${p.id}" aria-label="즐겨찾기">${S.saved.has(p.id)?'🔖':'🔖︎'}</button></div>
+      <div class="sub">${p.category} · ${sub ?? p.dist+' · '+p.walk}</div>
+      <div class="sub">${p.tags.join(' · ')}</div>
+      ${extra}
+    </div></article>`;
+}
+
+/* ============ 화면 정의 ============ */
+const routes = {
+  '/intro':{bar:()=>({brand:true,right:'<button class="link" data-nav="#/nearby" aria-label="닫기" style="font-size:22px;text-decoration:none">✕</button>'}), tab:false, view:vIntro},
+  '/login':{bar:()=>({title:'로그인',back:'#/intro'}), tab:false, view:vLogin},
+  '/signup':{bar:()=>({title:'회원가입',back:'#/intro'}), tab:false, view:vSignup},
+  '/nearby':{bar:()=>({brand:true,right:'<button class="link" data-nav="#/intro" aria-label="서비스 소개" style="text-decoration:none">ⓘ</button><button class="link" data-action="loc">위치 변경</button>'}), tab:'nearby', view:vNearby},
+  '/search':{bar:()=>({title:'장소 검색'}), tab:'search', view:vSearch},
+  '/filter':{bar:()=>({title:'검색 조건 설정',back:'#/search',right:'<button class="link" data-action="resetFilter">초기화</button>'}), tab:false, view:vFilter},
+  '/place':{bar:()=>({title:'장소 상세',back:'__back'}), tab:'search', view:vDetail},
+  '/mypage':{bar:()=>({title:'마이페이지'}), tab:'mypage', view:vMy}
+};
+
+function vIntro(){
+  return `<div class="stack">
+    <h2>내 주변에서 찾는<br>나에게 맞는 장소</h2>
+    <p class="sub">취향과 위치를 바탕으로 카페, 공원, 책방 등 가고 싶은 장소를 찾아보세요.</p>
+    <div class="thumb" style="height:150px">🖼 주변 장소 추천 화면</div>
+    <div>${DB.intro.map(f=>`<div class="feat"><span>${f.icon}</span><div><b>${f.title}</b><span class="sub">${f.text}</span></div></div>`).join('')}</div>
+    <hr style="border:0;border-top:1px solid var(--line)">
+    <button class="btn primary" data-nav="#/login">로그인</button>
+    <button class="btn" data-nav="#/signup">이메일로 회원가입</button>
+    <p class="sub" style="font-size:12px">계정에 취향, 저장 장소와 조회 기록이 연결됩니다.</p></div>`;
+}
+
+function vLogin(){
+  const L = S.login;
+  return `<div class="stack ${L.busy?'spin':''}">
+    <div><h2>다시 만나 반가워요</h2><p class="sub">로그인하고 저장한 취향과 장소를 이어서 확인하세요.</p></div>
+    <div><label class="lab" style="margin-top:0">이메일</label>
+      <div class="field"><input data-in="login.email" type="email" placeholder="이메일 주소 입력" value="${esc(L.email)}"></div>
+      <div class="err">${L.err.email||''}</div></div>
+    <div><label class="lab" style="margin-top:0">비밀번호</label>
+      <div class="field"><input data-in="login.pw" type="${L.show?'text':'password'}" placeholder="비밀번호 입력" value="${esc(L.pw)}">
+      <button data-action="togglePw" aria-label="비밀번호 표시 전환">${L.show?'숨김':'표시'}</button></div>
+      <div class="err">${L.err.pw||''}</div></div>
+    <button class="btn primary" data-action="doLogin" ${L.busy?'disabled':''}>${L.busy?'로그인 중…':'로그인'}</button>
+    <p class="note">인증이 완료되면 계정에 연결된 취향, 즐겨찾기와 최근 조회 기록을 불러옵니다.</p>
+    <hr style="border:0;border-top:1px solid var(--line)">
+    <p class="sub">아직 계정이 없으신가요?</p>
+    <button class="btn" data-nav="#/signup">회원가입으로 이동</button></div>`;
+}
+
+function signupState(){
+  const g = S.signup;
+  return {e:emailOk(g.email), p:pwOk(g.pw), m:g.pw && g.pw===g.pw2, t:g.terms&&g.priv};
+}
+function vSignup(){
+  const g = S.signup, v = signupState(), all = v.e&&v.p&&v.m&&v.t;
+  const btn = g.state==='busy' ? ['계정을 만드는 중…',true] : g.state==='fail' ? ['다시 시도',false] : ['동의하고 계정 만들기',!all];
+  return `<div class="stack">
+    <div><h2>나만의 장소 찾기 시작</h2><p class="sub">이메일과 비밀번호로 계정을 만드세요.</p></div>
+    <div><label class="lab" style="margin-top:0">이메일</label>
+      <div class="field"><input data-in="signup.email" type="email" placeholder="name@example.com" value="${esc(g.email)}"></div>
+      <div class="err" id="e-email"></div></div>
+    <div><label class="lab" style="margin-top:0">비밀번호</label>
+      <div class="field"><input data-in="signup.pw" type="password" placeholder="비밀번호 입력" value="${esc(g.pw)}"></div>
+      <div class="sub" style="font-size:12px;margin-top:4px">8자 이상, 영문과 숫자를 함께 입력해 주세요.</div>
+      <div class="err" id="e-pw"></div></div>
+    <div><label class="lab" style="margin-top:0">비밀번호 확인</label>
+      <div class="field"><input data-in="signup.pw2" type="password" placeholder="비밀번호 다시 입력" value="${esc(g.pw2)}"></div>
+      <div class="err" id="e-pw2"></div></div>
+    <label><input type="checkbox" data-chk="terms" ${g.terms?'checked':''}> [필수] 서비스 이용약관 동의 <button class="link" data-action="terms">보기</button></label><br>
+    <label><input type="checkbox" data-chk="priv" ${g.priv?'checked':''}> [필수] 개인정보 수집·이용 동의 <button class="link" data-action="terms">보기</button></label>
+    <div class="err" id="e-fail">${g.state==='fail'?'계정을 만들지 못했어요. 입력과 동의는 그대로 유지돼요. 다시 시도해 주세요.':''}</div>
+    <button class="btn primary" id="signupBtn" data-action="doSignup" ${btn[1]?'disabled':''}>${btn[0]}</button>
+    <p class="note">가입 완료 시 계정을 생성하고 사용자 데이터를 저장합니다. 로그인 후 취향과 장소 기록이 이 계정에 연결됩니다.</p>
+    <button class="link" data-nav="#/login">이미 계정이 있다면 로그인으로 이동 →</button></div>`;
+}
+function refreshSignup(){
+  const g = S.signup, v = signupState();
+  $('#e-email').textContent = g.email && !v.e ? '이메일 형식을 확인해 주세요.' : '';
+  $('#e-pw').textContent = g.pw && !v.p ? '8자 이상, 영문과 숫자를 함께 입력해 주세요.' : '';
+  $('#e-pw2').textContent = g.pw2 && !v.m ? '비밀번호가 일치하지 않아요.' : '';
+  const b = $('#signupBtn'); if(b && g.state!=='busy') b.disabled = !(v.e&&v.p&&v.m&&v.t);
+}
+
+function vNearby(){
+  const {cats,conds} = S.prefs, any = cats.length || conds.length;
+  const score = p => (cats.includes(p.category)?2:0) + p.conds.filter(c=>conds.includes(c)).length;
+  const list = DB.places.filter(p => (!any || score(p)>0) && (!S.nearbyCat || p.category===S.nearbyCat))
+    .sort((a,b)=>score(b)-score(a));
+  return `<div class="stack">
+    <div><h2>내 주변, 어디로 갈까요?</h2><p class="sub">현재 위치 ${esc(S.area)} 기준</p></div>
+    <div class="field"><span>🔍</span>&nbsp;<input id="nearQ" placeholder="키워드, 장소명 또는 지역 검색">
+      <button data-action="nearSearch">검색</button></div>
+    <div class="map"><span>📍 현재 위치 주변 지도</span></div>
+    <div class="row">${['',...cats].map(c=>chipHtml(c||'전체', S.nearbyCat===c, `data-near-cat="${c}"`)).join('')}</div>
+    <div><div class="sec" style="margin:0">내 취향 맞춤 추천</div>
+      <p class="sub" style="font-size:13px">${[...cats,...conds].join(' · ') || '저장한 취향이 없어요'}</p></div>
+    ${list.length ? list.map(p=>placeCard(p)).join('') : emptyBox('조건에 맞는 장소가 없어요','취향 설정을 바꿔 보세요.')}</div>`;
+}
+const emptyBox = (t,s) => `<div class="empty"><b>${t}</b>${s}</div>`;
+
+function runSearch(){
+  const {query,mode} = S.search, f = S.applied, q = query.trim();
+  return DB.places.filter(p => {
+    const hit = mode==='keyword'
+      ? [p.name,p.category,...p.tags].some(x=>x.includes(q))
+      : p.area.includes(q) || p.name.includes(q);
+    const cat = !f.category || p.category===f.category;
+    const con = !f.conditions.length || f.conditions.some(c=>p.conds.includes(c));
+    return hit && cat && con && (mode!=='keyword' || p.distM<=f.radiusKm*1000);
+  });
+}
+function vSearch(){
+  const {query,mode} = S.search, n = filterCount(S.applied);
+  const res = query.trim() ? runSearch() : [];
+  const basis = mode==='keyword' ? '현재 위치 주변에서 조건에 맞는 장소를 추천합니다.'
+    : `‘${esc(query)}’ 지역 기준으로 장소를 추천합니다.`;
+  return `<div class="stack">
+    <div class="field" style="border-color:var(--ink)"><span>🔍</span>&nbsp;
+      <input id="searchQ" placeholder="키워드, 지명 또는 장소명" value="${esc(query)}">
+      <button data-action="clearQ" aria-label="지우기">✕</button></div>
+    <div class="err" id="qErr"></div>
+    <div class="row">${chipHtml('키워드',mode==='keyword','data-mode="keyword"')}${chipHtml('지명·장소명',mode==='area','data-mode="area"')}</div>
+    <div class="note">${mode==='keyword'?'키워드':'지명·장소명'} ‘${esc(query)}’ 검색 결과<br>${basis}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="sec" style="margin:0">추천 결과 ${res.length}개</div>
+      <button class="btn sm" data-nav="#/filter">필터 · ${n}</button></div>
+    ${res.length ? res.map(p=>placeCard(p, {sub: mode==='area'? `${p.area} 기준` : '현재 위치 주변 '+p.dist})).join('')
+      : emptyBox('조건에 맞는 결과가 없어요','조건을 줄이거나 검색어를 바꿔 보세요.')}
+    <div class="card"><b>지명·장소명 검색으로 전환하면</b>
+      <p class="sub">‘성수동’ → 성수동 기준 추천<br>장소명 → 해당 장소가 속한 지역 기준 추천<br>결과 예시: 골목 책방 · 금호동 기준</p></div></div>`;
+}
+
+function vFilter(){
+  const d = S.draft, m = S.search.mode;
+  return `<div class="stack">
+    <div class="sec" style="font-size:18px">추천 기준</div>
+    <div class="card clickable" data-mode-draft="keyword" style="${m==='keyword'?'border:2px solid var(--ink)':''}">
+      <b>${m==='keyword'?'◉':'○'} 키워드 · ${esc(S.search.query)}</b><div class="sub">현재 위치 주변을 기준으로 추천</div></div>
+    <div class="card clickable" data-mode-draft="area" style="${m==='area'?'border:2px solid var(--ink)':''}">
+      <b>${m==='area'?'◉':'○'} 지명·장소명 · 성수동</b><div class="sub">입력한 지역 또는 장소의 지역 기준으로 추천</div></div>
+    <hr style="border:0;border-top:1px solid var(--line)">
+    <div><div class="sec">기준 위치에서 검색 범위</div>
+      <div class="row">${[1,3,5].map(k=>chipHtml(k+' km', d.radiusKm===k, `data-radius="${k}"`)).join('')}</div></div>
+    <div><div class="sec">장소 카테고리</div>
+      <div class="row">${DB.categories.map(c=>chipHtml(c, d.category===c, `data-fcat="${c}"`)).join('')}</div></div>
+    <div><div class="sec">세부 조건 · 복수 선택</div>
+      <div class="row">${DB.conditions.map(c=>chipHtml(c, d.conditions.includes(c), `data-fcond="${c}"`)).join('')}</div></div>
+    <p class="note">이번 검색에 적용됩니다. 내 취향 설정은 변경하지 않습니다.</p>
+    <button class="btn primary" data-action="applyFilter">선택한 조건 적용</button></div>`;
+}
+
+function vDetail(id){
+  const p = place(id); if(!p) return emptyBox('장소를 찾을 수 없어요','목록으로 돌아가 다시 선택해 주세요.');
+  const saved = S.saved.has(p.id);
+  return `<div class="stack">
+    <div class="thumb" style="height:150px">🖼 장소 이미지</div>
+    <div><h2>${p.name}</h2><p class="sub">${p.category} · 현재 위치 주변 ${p.dist}</p>
+      <div class="row" style="margin-top:8px">${p.tags.map(t=>`<span class="badge">${t}</span>`).join('')}</div></div>
+    <p>${p.desc}</p>
+    <hr style="border:0;border-top:1px solid var(--line)">
+    <div><div class="sec">장소 정보</div>
+      <p><b>주소</b>&nbsp; ${p.address}</p><p><b>운영</b>&nbsp; ${p.hours}</p><p><b>시설</b>&nbsp; ${p.facilities}</p></div>
+    <div class="map"><span>📍 장소 위치 지도 영역</span></div>
+    <button class="btn primary" data-route="${p.id}">🧭 길찾기</button>
+    <button class="btn" data-save="${p.id}">${saved?'✓ 즐겨찾기 저장됨 · 해제':'즐겨찾기에 저장'}</button></div>`;
+}
+
+/* 마이페이지 */
+function vMy(){
+  const u = S.user;
+  const head = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div class="thumb" style="width:46px;height:46px;border-radius:50%">👤</div>
+      <div style="flex:1"><b>사용자님</b><div class="sub" style="font-size:13px">${esc(u.email)}</div></div>
+      <button class="link" data-action="logout">로그아웃</button></div>
+    <div class="seg" style="margin-bottom:18px">${[['prefs','취향 설정'],['fav','즐겨찾기'],['recent','최근 본 장소']]
+      .map(([k,l])=>`<button class="${S.section===k?'on':''}" data-section="${k}">${l}</button>`).join('')}</div>`;
+  return head + ({prefs:myPrefs, fav:myFav, recent:myRecent}[S.section])();
+}
+function myPrefs(){
+  const d = S.draftPrefs ||= structuredClone(S.prefs);
+  return `<div class="stack">
+    <div><h2 style="font-size:22px">나의 취향 설정</h2><p class="sub">저장된 취향을 불러왔어요. 선택하거나 수정해 주세요.</p></div>
+    <div><div class="sec">선호 카테고리 · 복수 선택</div>
+      <div class="row">${DB.categories.map(c=>chipHtml(c,d.cats.includes(c),`data-pcat="${c}"`)).join('')}</div></div>
+    <div><div class="sec">세부 조건 · 복수 선택</div>
+      <div class="row">${DB.conditions.map(c=>chipHtml(c,d.conds.includes(c),`data-pcond="${c}"`)).join('')}</div></div>
+    <div><div class="sec">추가 선호 조건</div>
+      <div class="field"><input data-in="draftPrefs.extra" value="${esc(d.extra)}"></div></div>
+    <button class="btn primary" data-action="savePrefs">수정한 취향 저장</button>
+    <p class="note">저장한 취향은 내 계정에 연결되며, 주변 장소 추천 시 기본 조건으로 사용됩니다.</p></div>`;
+}
+function myFav(){
+  const cats = ['', ...new Set([...S.saved].map(id=>place(id)?.category))];
+  const all = [...S.saved].map(place);
+  const list = all.filter(p => !S.favCat || p.category===S.favCat);
+  const body = !all.length ? `<div class="empty"><b>저장한 장소가 없어요</b>주변 장소를 둘러보고 마음에 드는 곳을 저장해 보세요.<br><br><button class="btn sm primary" data-nav="#/nearby">장소 탐색하기</button></div>`
+    : !list.length ? emptyBox('이 카테고리에 저장한 장소가 없어요','다른 카테고리를 선택해 보세요.')
+    : list.map(p=>`<article class="card place clickable" data-go-place="${p.id}"><div class="thumb">🖼</div>
+        <div class="body"><h3>${p.name}</h3><div class="sub">${p.category} · ${p.area}</div><div class="sub">${p.tags.join(' · ')}</div>
+        <div class="acts"><span class="sub">상세 보기 →</span><button class="btn sm" data-save="${p.id}">저장 해제</button></div></div></article>`).join('<div style="height:12px"></div>');
+  return `<div class="stack"><div><h2 style="font-size:22px">저장한 장소 ${all.length}개</h2><p class="sub">다시 가고 싶은 장소를 한곳에서 확인하세요.</p></div>
+    <div class="row">${cats.map(c=>chipHtml(c||'전체',S.favCat===c,`data-fav-cat="${c}"`)).join('')}</div>${body}
+    <p class="sub" style="font-size:12px">장소를 누르면 상세로 이동합니다. 저장 해제한 장소는 이 목록에서 제외됩니다.</p></div>`;
+}
+function myRecent(){
+  const items = [...S.history].sort((a,b)=>b.at-a.at);
+  const group = (title, arr) => arr.length ? `<div class="sec" style="margin-top:6px">${title}</div>` + arr.map((h,i)=>{
+      const p = place(h.id);
+      return `<article class="card place clickable" data-go-place="${p.id}" style="margin-bottom:12px"><div class="thumb">🖼</div>
+        <div class="body"><div class="sub" style="font-size:12px">${title==='오늘'&&h===items[0]?'방금 확인':fmtTime(h.at)}</div>
+        <h3>${p.name}</h3><div class="sub">${p.category} · ${p.area}</div><div class="sub">${p.tags.join(' · ')}</div>
+        <div class="acts"><span class="sub">상세 보기 →</span><button class="btn sm">상세 이동</button></div></div></article>`;}).join('') : '';
+  const today = items.filter(h=>isToday(h.at)), before = items.filter(h=>!isToday(h.at));
+  return `<div class="stack"><div><h2 style="font-size:22px">최근 본 장소</h2><p class="sub">상세 정보를 확인한 순서대로 표시됩니다.</p></div>
+    ${items.length ? group('오늘',today)+group('어제',before) : `<div class="empty"><b>아직 본 장소가 없어요</b>장소를 탐색하면 여기에 기록돼요.</div>`}</div>`;
+}
+
+/* ============ 라우터 / 렌더 ============ */
+function render(){
+  const [path, arg] = (location.hash.replace('#','') || '/intro').split('?');
+  let r = routes[path] || routes['/intro'], p = routes[path] ? path : '/intro';
+  if(p==='/mypage' && !S.user){ location.hash = '#/login'; return; }
+  if(['/nearby','/search','/place','/filter'].includes(p) && !S.user && p!=='/place'){ /* 목업: 비로그인도 탐색 허용 */ }
+  const bar = r.bar();
+  $('#appbar').innerHTML =
+    (bar.back ? `<button class="link" style="font-size:20px;text-decoration:none" data-nav="${bar.back}" aria-label="뒤로">←</button>` : '') +
+    (bar.brand ? `<span class="brand">Place<i>ON</i></span><span style="flex:1"></span>` : `<h1>${bar.title}</h1>`) +
+    (bar.right ? (bar.right.startsWith('<') ? bar.right : `<span class="sub">${bar.right}</span>`) : '');
+  const tab = $('#tabbar'); tab.hidden = !r.tab; $('.home-bar').hidden = p==='/intro';
+  tab.innerHTML = [['nearby','🏠','홈'],['search','🔍','검색'],['mypage','👤','마이페이지']]
+    .map(([k,i,l])=>`<button class="${r.tab===k?'on':''}" data-nav="#/${k}"><span>${i}</span>${l}</button>`).join('');
+  $('#content').innerHTML = r.view(arg);
+  $('#content').scrollTop = 0;
+  if(p==='/place' && arg && place(arg)){ // 최근 본 장소 기록
+    S.history = [{id:arg,at:Date.now()}, ...S.history.filter(h=>h.id!==arg)];
+  }
+  if(p==='/signup') refreshSignup();
+}
+window.addEventListener('hashchange', render);
+const go = h => { location.hash = h; };
+
+/* ============ 이벤트 (위임) ============ */
+const setPath = (path, val) => { const k = path.split('.'); k.reduce((o,key,i)=> i===k.length-1 ? (o[key]=val) : o[key], S); };
+
+document.addEventListener('input', e => {
+  const t = e.target, path = t.dataset.in;
+  if(!path) return;
+  setPath(path, t.value);
+  if(path.startsWith('signup')){ S.signup.state='idle'; $('#e-fail').textContent=''; refreshSignup(); }
+});
+
+document.addEventListener('change', e => {
+  const k = e.target.dataset.chk;
+  if(k){ S.signup[k] = e.target.checked; S.signup.state='idle'; refreshSignup(); }
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key!=='Enter') return;
+  if(e.target.id==='searchQ') doSearchInput();
+  if(e.target.id==='nearQ') actions.nearSearch();
+});
+
+const actions = {
+  togglePw(){ S.login.show = !S.login.show; render(); },
+  doLogin(){
+    const L = S.login; L.err = {};
+    if(!L.email) L.err.email = '이메일을 입력해 주세요.'; else if(!emailOk(L.email)) L.err.email = '이메일 형식을 확인해 주세요.';
+    if(!L.pw) L.err.pw = '비밀번호를 입력해 주세요.';
+    if(L.err.email || L.err.pw) return render();
+    L.busy = true; render();
+    setTimeout(()=>{ L.busy=false; S.user={email:L.email,userId:'u1'}; L.pw=''; toast('로그인했어요. 저장한 취향을 불러왔어요.'); go('#/nearby'); }, 700);
+  },
+  logout(){ S.user=null; S.section='prefs'; toast('로그아웃했어요.'); go('#/intro'); },
+  terms(){ toast('약관 내용은 목업에서 제공하지 않아요.'); },
+  doSignup(){
+    const g = S.signup;
+    g.state='busy'; render();
+    setTimeout(()=>{
+      if(g.email.startsWith('fail')){ g.state='fail'; render(); return; } // 실패 시연: fail@... 입력
+      g.state='idle'; S.login.email=g.email; toast('계정을 만들었어요. 로그인해 주세요.'); go('#/login');
+    }, 900);
+  },
+  loc(){ const a = prompt('현재 위치 지역을 입력하세요', S.area); if(a && a.trim()){ S.area = a.trim(); render(); } },
+  nearSearch(){ const q=$('#nearQ').value.trim(); if(!q) return toast('검색어를 입력해 주세요.'); S.search.query=q; go('#/search'); },
+  clearQ(){ S.search.query=''; render(); },
+  resetFilter(){ S.draft = DEFAULT_FILTERS(); render(); },
+  applyFilter(){
+    S.applied = structuredClone(S.draft);
+    toast(runSearch().length ? '조건을 적용했어요.' : '결과가 없어요. 조건을 줄여 보세요.'); go('#/search');
+  },
+  savePrefs(){ S.prefs = structuredClone(S.draftPrefs); S.dirty=false; S.nearbyCat=''; toast('취향을 저장했어요.'); render(); }
+};
+function doSearchInput(){
+  const v = $('#searchQ').value;
+  if(!v.trim()){ $('#qErr').textContent='검색어를 입력해 주세요.'; return; }
+  S.search.query = v; render();
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-nav],[data-action],[data-save],[data-route],[data-go-place],[data-mode],[data-mode-draft],[data-radius],[data-fcat],[data-fcond],[data-near-cat],[data-fav-cat],[data-section],[data-pcat],[data-pcond]');
+  if(!el) return;
+  const d = el.dataset;
+  if(d.save){ e.stopPropagation(); // 즐겨찾기 토글
+    S.saved.has(d.save) ? S.saved.delete(d.save) : S.saved.add(d.save);
+    toast(S.saved.has(d.save) ? '즐겨찾기에 저장했어요.' : '저장을 해제했어요.'); return render(); }
+  if(d.route){ const p = place(d.route);
+    window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.area+' '+p.name), '_blank', 'noopener');
+    return toast('길찾기를 새 탭에서 열었어요.'); }
+  if(d.goPlace){ S.detailFrom = location.hash; return go('#/place?'+d.goPlace); }
+  if(d.nav){ if(d.nav==='__back') return history.back(); return go(d.nav); }
+  if(d.action) return actions[d.action]();
+  if(d.mode){ S.search.mode = d.mode; if(!$('#searchQ').value.trim()) return render(); S.search.query=$('#searchQ').value; return render(); }
+  if(d.modeDraft){ S.search.mode = d.modeDraft; return render(); }
+  if(d.radius){ S.draft.radiusKm = +d.radius; return render(); }
+  if(d.fcat){ S.draft.category = S.draft.category===d.fcat ? '' : d.fcat; return render(); }
+  if(d.fcond){ S.draft.conditions = toggleIn(S.draft.conditions, d.fcond); return render(); }
+  if('nearCat' in d){ S.nearbyCat = d.nearCat; return render(); }
+  if('favCat' in d){ S.favCat = d.favCat; return render(); }
+  if(d.section){
+    if(S.section==='prefs' && S.draftPrefs && JSON.stringify(S.draftPrefs)!==JSON.stringify(S.prefs) && d.section!=='prefs'){
+      if(!confirm('저장하지 않은 수정 내용이 있어요. 이동할까요?')) return;
+      S.draftPrefs = null;
+    }
+    S.section = d.section; return render(); }
+  if(d.pcat){ S.draftPrefs.cats = toggleIn(S.draftPrefs.cats, d.pcat); return render(); }
+  if(d.pcond){ S.draftPrefs.conds = toggleIn(S.draftPrefs.conds, d.pcond); return render(); }
+});
+
+// 필터 진입 시 적용값을 임시값으로 복사 (뒤로 가면 이전 조건 유지)
+const _render = render;
+window.addEventListener('hashchange', () => { if(location.hash.startsWith('#/filter')) S.draft = structuredClone(S.applied); }, true);
+
+render();
+</script>
+</body>
+</html>
