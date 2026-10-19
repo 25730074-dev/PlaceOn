@@ -130,9 +130,9 @@
     }
     var list = recs();
     return bar + '<div class="sec">' + mapHTML(null, true) + '</div>' +
-      '<div class="sec nb" style="padding-bottom:0"><div class="rw"><span class="lbl">내 주변 추천</span><span class="lbl">' + (S.prefs.cat.length ? '취향 + 거리순' : '거리순') + '</span></div></div>' +
-      list.map(function (p) { return card(p); }).join('') +
-      (S.prefs.cat.length ? '' : '<div class="sec nb"><div class="sb">취향을 설정하면 추천이 더 정확해져요 (로그인 후 마이 → 취향 설정)</div></div>');
+      '<div class="cap"><span>내 주변 추천</span><span>' + (S.prefs.cat.length ? '취향 + 거리순' : '거리순') + '</span></div>' +
+      '<div class="list">' + list.map(function (p) { return card(p); }).join('') + '</div>' +
+      (S.prefs.cat.length ? '' : '<div class="cap" style="margin-top:4px">취향을 설정하면 추천이 더 정확해져요 (로그인 후 마이 → 취향 설정)</div>');
   }
 
   function vSearch(arg) {
@@ -172,7 +172,7 @@
       '<button class="chip' + (S.sort === 'dist' ? ' on' : '') + '" data-act="sort" data-v="dist">가까운 순</button>' +
       '<button class="chip' + (S.sort === 'match' ? ' on' : '') + '" data-act="sort" data-v="match">취향 일치순</button></span></div></div>';
     return head + filters + summary + '<div class="sec">' + mapHTML(list, false) + '</div>' + sortRow +
-      list.map(function (p, i) { return card(p, i + 1); }).join('');
+      '<div class="list">' + list.map(function (p, i) { return card(p, i + 1); }).join('') + '</div>';
   }
 
   function vDetail(id) {
@@ -192,11 +192,11 @@
     if (!S.logged) return tabs + empty('로그인이 필요합니다', '로그인하면 즐겨찾기와 최근 본 장소, 취향을 저장할 수 있어요', '<button class="btn d" data-go="#auth">로그인 · 회원가입</button>');
     if (tab === 'fav') {
       var l = S.fav.map(byId).filter(Boolean);
-      return tabs + (l.length ? l.map(function (p) { return card(p); }).join('') : empty('저장한 장소가 없습니다', '마음에 드는 곳을 저장하면 여기에서 다시 볼 수 있습니다', '<button class="btn g" data-go="#search">장소 둘러보기</button>'));
+      return tabs + (l.length ? '<div class="list">' + l.map(function (p) { return card(p); }).join('') + '</div>' : empty('저장한 장소가 없습니다', '마음에 드는 곳을 저장하면 여기에서 다시 볼 수 있습니다', '<button class="btn g" data-go="#search">장소 둘러보기</button>'));
     }
     if (tab === 'hist') {
       var h = S.hist.map(function (x) { return byId(x.id); }).filter(Boolean);
-      return tabs + (h.length ? h.map(function (p) { return card(p); }).join('') : empty('최근 확인한 장소가 없습니다', '장소 상세를 열어보면 여기에 기록돼요', '<button class="btn g" data-go="#search">장소 둘러보기</button>'));
+      return tabs + (h.length ? '<div class="list">' + h.map(function (p) { return card(p); }).join('') + '</div>' : empty('최근 확인한 장소가 없습니다', '장소 상세를 열어보면 여기에 기록돼요', '<button class="btn g" data-go="#search">장소 둘러보기</button>'));
     }
     var pr = S.prefs, j = function (a) { return a.length ? a.join(', ') : '미설정'; };
     return tabs + '<div class="pad">' + kv([['카테고리', j(pr.cat)], ['분위기', j(pr.mood)], ['가격대', j(pr.price)], ['이동 거리', pr.walk ? '도보 ' + pr.walk + '분' : '미설정']]) +
@@ -220,13 +220,6 @@
     '검색': '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg>',
     '마이': '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>'
   };
-  var PANEL = [
-    ['랜딩', [['소개', '#landing'], ['로그인/회원가입', '#auth'], ['인증 오류', '#auth/error']]],
-    ['메인', [['기본', '#home'], ['로딩', '#home/loading'], ['위치 권한 거부', '#home/denied']]],
-    ['장소 검색', [['조건 적용', '#search'], ['로딩', '#search/loading'], ['결과 없음', '#search/empty'], ['오류', '#search/error']]],
-    ['장소 상세', [['상세 정보', '#detail/1']]],
-    ['마이', [['즐겨찾기', '#my'], ['최근 본 장소', '#my/hist'], ['취향 설정', '#prefs']]]
-  ];
   var lastRoute = '';
 
   function cur() { var h = (location.hash || '#landing').slice(1).split('/'); return { name: h[0] || 'landing', arg: h[1] }; }
@@ -258,29 +251,17 @@
 
     var showHd = true, noNav = (r.name === 'landing' || r.name === 'auth' || !html);
     var right = '';
-    if (!(r.name === 'landing' || r.name === 'auth')) right = S.logged ? '<button class="btn sm" data-act="logout">로그아웃</button>' : '<button class="btn sm" data-go="#auth">로그인</button>';
+    if (!(r.name === 'landing' || r.name === 'auth')) {
+      right = '<span class="hr"><a class="ib" href="#search" aria-label="검색">' + ICONS['검색'] + '</a>' +
+        (S.logged ? '<button class="btn" data-act="logout">로그아웃</button>' : '<button class="btn" data-go="#auth">로그인</button>') + '</span>';
+    }
     $('#hd').hidden = !showHd;
-    $('#hd').innerHTML = '<a class="logo" href="' + (r.name === 'landing' ? '#landing' : '#home') + '">LOGO</a>' + right;
+    $('#hd').innerHTML = '<a class="brand" href="' + (r.name === 'landing' ? '#landing' : '#home') + '">장소찾기</a>' + right;
 
     var active = (r.name === 'home') ? '홈' : (r.name === 'search' || r.name === 'detail') ? '검색' : (r.name === 'my' || r.name === 'prefs') ? '마이' : '';
     var tabHref = { '홈': '#home', '검색': '#search', '마이': '#my' };
     $('#bn').hidden = noNav || r.name === 'landing';
     $('#bn').innerHTML = ['홈', '검색', '마이'].map(function (t) { return '<a href="' + tabHref[t] + '" class="' + (t === active ? 'on' : '') + '">' + ICONS[t] + '<span>' + t + '</span></a>'; }).join('');
-    renderPanel();
-  }
-
-  function renderPanel() {
-    var h = location.hash || '#landing', out = '<h2>화면 목록</h2>';
-    PANEL.forEach(function (g) {
-      out += '<h3>' + g[0] + '</h3>';
-      g[1].forEach(function (i) {
-        var on = (h === i[1]) || (i[1] === '#detail/1' && h.indexOf('#detail') === 0) || (i[1] === '#home' && h === '#home') ;
-        out += '<a href="' + i[1] + '" class="' + (on ? 'on' : '') + '">' + i[0] + '</a>';
-      });
-    });
-    out += '<button class="login" data-act="toggleLogin">로그인 상태: <b>' + (S.logged ? 'ON' : 'OFF') + '</b> (눌러서 전환)</button>';
-    out += '<p class="note">저장·마이·취향 설정은 로그인 상태에서 동작해요. 좌측 목록으로 모든 화면 상태를 바로 볼 수 있어요.</p>';
-    $('#panel').innerHTML = out;
   }
 
   var toastTimer;
