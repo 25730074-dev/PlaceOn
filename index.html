@@ -3,15 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PlaceON 로우파이 와이어프레임 · 흐름 점검용</title>
+<title>PlaceON 로우파이 와이어프레임 (모바일)</title>
 <style>
 /* 로우파이: 흑백 · 단일 서체/크기/굵기 · 아이콘 없음 · 둥근 모서리/그림자 없음 */
 *{box-sizing:border-box;margin:0;padding:0;font:inherit;color:#000;border-radius:0}
 html{font:16px/1.5 sans-serif;-webkit-text-size-adjust:100%}
 html,body{height:100%;overscroll-behavior:none}
 body{background:#fff;display:flex;justify-content:center}
-button,input{background:#fff;border:1px solid #000;cursor:pointer}
-button,[data-a]{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button,input{background:#fff;border:1px solid #000;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 input{cursor:text;padding:12px;width:100%;outline:none}
 input:focus{outline:2px solid #000;outline-offset:1px}
 hr{border:0;border-top:1px solid #000}
@@ -22,6 +21,7 @@ hr{border:0;border-top:1px solid #000}
 #bar button{min-height:44px;padding:4px 14px}
 #bar .t{flex:1}
 #content{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
+#content.full{padding:0;overflow:hidden;position:relative}
 #content>*+*,.stk>*+*{margin-top:12px}
 #tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #000;padding-bottom:env(safe-area-inset-bottom)}
 #tabs button{border:0;border-left:1px solid #000;min-height:56px}
@@ -37,7 +37,7 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 .bt{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .box{border:1px solid #000;padding:12px}
 .dash{border:1px dashed #000;padding:12px}
-.card{display:flex;gap:12px;border:1px solid #000;padding:12px;cursor:pointer;position:relative}
+.card{display:flex;gap:12px;border:1px solid #000;padding:12px;cursor:pointer;position:relative;background:#fff}
 .card .img{width:80px;height:80px;flex:none}
 .card .bd{flex:1;min-width:0}
 .img{border:1px solid #000;display:grid;place-items:center;
@@ -55,6 +55,29 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 .pw .field{flex:1}
 .msg{position:absolute;left:16px;right:16px;bottom:calc(72px + env(safe-area-inset-bottom));border:2px solid #000;background:#fff;padding:8px 12px;z-index:9}
 
+/* 홈: 전체 화면 지도 + 바텀시트 */
+.home{position:absolute;inset:0;overflow:hidden;--sh:170px}
+.homemap{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;background:#fff;cursor:grab}
+#world{position:absolute;left:0;top:0;width:1000px;height:1000px;transform-origin:0 0}
+#world svg{display:block;pointer-events:none}
+.pin{position:absolute;z-index:3;transform:translate(-50%,-100%) scale(calc(1 / var(--k,1)));transform-origin:50% 100%;border:0;background:none;padding:0;min-height:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.pin i{display:block;width:14px;height:14px;background:#000}
+.pin small,.me small{font-size:12px;border:1px solid #000;background:#fff;padding:0 6px;white-space:nowrap}
+.me{position:absolute;left:500px;top:500px;z-index:2;width:18px;height:18px;border-radius:50%;background:#000;border:3px solid #fff;box-shadow:0 0 0 2px #000;transform:translate(-50%,-50%) scale(calc(1 / var(--k,1)))}
+.me small{position:absolute;top:28px;left:50%;transform:translateX(-50%)}
+.maptop{position:absolute;top:10px;left:10px;right:10px;z-index:5;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.maptop>*{pointer-events:auto;align-self:flex-start}
+.pill{border:1px solid #000;background:#fff;padding:4px 12px}
+.ctrl{position:absolute;right:10px;bottom:calc(var(--sh) + 12px);z-index:5;display:flex;flex-direction:column;gap:6px}
+.ctrl button{width:56px;min-height:44px;padding:0}
+.home.max .ctrl{display:none}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;height:170px;background:#fff;border-top:2px solid #000;display:flex;flex-direction:column}
+.drag{touch-action:none;cursor:grab;flex:none}
+.grab{padding:10px 0;display:grid;place-items:center}
+.grab i{display:block;width:40px;height:4px;background:#000}
+.sheet-head{padding:0 16px 10px}
+.sheet-list{flex:1;overflow-y:auto;padding:4px 16px 16px}
+.sheet-list>*+*{margin-top:12px}
 </style>
 </head>
 <body>
@@ -67,29 +90,30 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 
 <script type="application/json" id="data">
 {
-  "places":[
-    {"id":"p1","name":"모퉁이 카페","cat":"카페","tags":["조용한 공간","혼자 방문"]},
-    {"id":"p2","name":"창가 카페","cat":"카페","tags":["창가 좌석","편안한 분위기"]},
-    {"id":"p3","name":"동네 커피집","cat":"카페","tags":["작은 공간","대화하기 좋은 곳"]},
-    {"id":"p4","name":"작은 숲 공원","cat":"공원","tags":["가벼운 산책","야외 공간"]},
-    {"id":"p5","name":"골목 책방","cat":"책방","tags":["작은 서점","쉬어 가는 공간"]}
+  "map": {"me": [500, 500], "zoom": 0.75, "minZoom": 0.4, "maxZoom": 2.5},
+  "categories": ["카페", "음식점", "공원", "책방", "문화공간"],
+  "conditions": ["조용한 공간", "혼자 방문", "야외 공간", "주차 가능"],
+  "radiusOptions": [1, 3, 5],
+  "intro": [
+    ["가까운 장소 추천", "현재 위치 주변의 장소를 살펴보세요."],
+    ["내 취향에 맞게 검색", "키워드 또는 지역과 조건으로 찾아보세요."],
+    ["마음에 드는 장소 저장", "즐겨찾기와 최근 본 장소를 모아보세요."]
   ],
-  "cats":["카페","음식점","공원","책방","문화공간"],
-  "conds":["조용한 공간","혼자 방문","야외 공간","주차 가능"],
-  "nearCats":["전체","카페","공원","책방"],
-  "radius":[1,3,5],
-  "intro":[
-    ["가까운 장소 추천","현재 위치 주변의 장소를 살펴보세요."],
-    ["내 취향에 맞게 검색","키워드 또는 지역과 조건으로 찾아보세요."],
-    ["마음에 드는 장소 저장","즐겨찾기와 최근 본 장소를 모아보세요."]
-  ],
-  "titles":{"01":"서비스 소개","02":"로그인","03":"회원가입","04":"주변 장소 추천","05":"장소 검색 결과","06":"검색 필터 설정","07":"장소 상세 정보","08":"마이페이지 · 취향 설정","09":"마이페이지 · 즐겨찾기","10":"마이페이지 · 최근 본 장소"},
-  "defaults":{
-    "query":"카페",
-    "filters":{"radius":1,"cat":"카페","conds":["조용한 공간","혼자 방문"]},
-    "prefs":{"cats":["카페","책방"],"conds":["조용한 공간","혼자 방문"],"extra":"창가 좌석이 있는 곳"},
-    "saved":["p1","p2","p5"]
-  }
+  "defaults": {
+    "area": "성수동",
+    "search": {"query": "카페", "mode": "keyword"},
+    "filters": {"radiusKm": 1, "category": "", "conditions": []},
+    "prefs": {"cats": ["카페", "책방"], "conds": ["조용한 공간", "혼자 방문"], "extra": "창가 좌석이 있는 곳"},
+    "saved": ["p1", "p5"],
+    "history": [{"id": "p1", "hoursAgo": 0}, {"id": "p4", "hoursAgo": 2}, {"id": "p5", "hoursAgo": 24}]
+  },
+  "places": [
+    {"id": "p1", "name": "모퉁이 카페", "category": "카페", "area": "성수동", "dist": "50m", "distM": 50, "pos": [540, 470], "walk": "도보 1분", "conds": ["조용한 공간", "혼자 방문"], "tags": ["조용한 공간", "혼자 방문"], "address": "서울 성동구 성수동 연무장길 12", "hours": "매일 10:00 – 21:00 (연중무휴)", "facilities": "1인 좌석 · 콘센트 · 무료 와이파이", "desc": "골목 안쪽에 자리한 아담한 카페예요. 조용한 분위기라 책을 읽거나 혼자만의 시간을 보내기 좋아요."},
+    {"id": "p2", "name": "창가 카페", "category": "카페", "area": "송정동", "dist": "600m", "distM": 600, "pos": [360, 330], "walk": "도보 8분", "conds": ["조용한 공간"], "tags": ["창가 좌석", "편안한 분위기"], "address": "서울 성동구 송정동 송정길 24", "hours": "화~일 09:30 – 20:00 (월요일 휴무)", "facilities": "창가 좌석 · 테라스 · 콘센트", "desc": "큰 창으로 햇살이 들어오는 카페예요. 창가 자리에서 편하게 쉬어 가기 좋아요."},
+    {"id": "p3", "name": "동네 커피집", "category": "카페", "area": "용답동", "dist": "900m", "distM": 900, "pos": [700, 250], "walk": "도보 12분", "conds": ["주차 가능"], "tags": ["작은 공간", "대화하기 좋은 곳"], "address": "서울 성동구 용답동 용답중앙길 58", "hours": "매일 08:00 – 22:00", "facilities": "주차 2대 · 단체석 · 무료 와이파이", "desc": "동네 사람들이 자주 찾는 작은 커피집이에요. 주차가 가능하고 가볍게 대화하기 좋아요."},
+    {"id": "p4", "name": "작은 숲 공원", "category": "공원", "area": "행당동", "dist": "1.2km", "distM": 1200, "pos": [800, 780], "walk": "도보 16분", "conds": ["야외 공간"], "tags": ["가벼운 산책", "야외 공간"], "address": "서울 성동구 행당동 행당로 77", "hours": "상시 개방 (05:00 – 24:00)", "facilities": "산책로 · 벤치 · 화장실 · 야외 운동기구", "desc": "나무가 우거진 작은 공원이에요. 가볍게 산책하거나 벤치에서 쉬어 가기 좋아요."},
+    {"id": "p5", "name": "골목 책방", "category": "책방", "area": "금호동", "dist": "1.8km", "distM": 1800, "pos": [130, 780], "walk": "도보 24분", "conds": ["조용한 공간", "혼자 방문"], "tags": ["작은 서점", "쉬어 가는 공간"], "address": "서울 성동구 금호동 금호로 19", "hours": "월~토 11:00 – 20:00 (일요일 휴무)", "facilities": "독서 공간 · 소규모 북토크 · 음료 판매", "desc": "작은 서점과 독서 공간이 함께 있는 책방이에요. 조용히 책을 고르며 쉬어 가기 좋아요."}
+  ]
 }
 </script>
 
@@ -100,33 +124,50 @@ const place = id => D.places.find(p => p.id === id);
 const isEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const isPw = v => v.length >= 8 && /[A-Za-z]/.test(v) && /\d/.test(v);
 const toggle = (a, v) => a.includes(v) ? a.filter(x => x !== v) : [...a, v];
-let S, LOG = [];
+const fcount = f => f.conditions.length + (f.category ? 1 : 0);
+let S;
 
 function init() {
-  const d = D.defaults, now = Date.now(), sod = new Date().setHours(0, 0, 0, 0), y = new Date();
-  y.setDate(y.getDate() - 1); y.setHours(15, 10, 0, 0);
+  const d = D.defaults;
   S = {
-    screen: '01', user: false, area: '', query: d.query, mode: 'keyword', err: '',
-    saved: new Set(d.saved),
-    history: [{ id: 'p1', at: now }, { id: 'p4', at: sod + (now - sod) / 2 }, { id: 'p5', at: y.getTime() }],
-    applied: structuredClone(d.filters), draft: null, filterFrom: '05', nearCat: '전체',
-    prefs: structuredClone(d.prefs), pdraft: structuredClone(d.prefs), favCat: '전체',
+    screen: '01', user: false, err: '', loginEmail: '',
+    area: d.area, search: { ...d.search }, applied: structuredClone(d.filters), draft: null, nearCat: '',
+    prefs: structuredClone(d.prefs), pdraft: structuredClone(d.prefs), favCat: '',
+    saved: new Set(d.saved), history: d.history.map(h => ({ id: h.id, at: Date.now() - h.hoursAgo * 3600e3 })),
     placeId: null, from: '04',
-    login: { email: '', pw: '', show: false, busy: false, err: {} },
+    login: { pw: '', show: false, busy: false, err: {} },
     signup: { email: '', pw: '', pw2: '', terms: false, priv: false, state: 'idle' }
   };
 }
 
+/* ───────── 추천·검색 로직 (앱과 동일) ───────── */
+function recommend() {
+  const { cats, conds } = S.prefs, any = cats.length || conds.length;
+  const score = p => (cats.includes(p.category) ? 2 : 0) + p.conds.filter(c => conds.includes(c)).length;
+  return D.places.filter(p => (!any || score(p) > 0) && (!S.nearCat || p.category === S.nearCat)).sort((a, b) => score(b) - score(a));
+}
+function searchPlaces() {
+  const q = S.search.query.trim(), { mode } = S.search, f = S.applied;
+  if (!q) return [];
+  return D.places.filter(p => {
+    const hit = mode === 'keyword' ? [p.name, p.category, ...p.tags].some(x => x.includes(q)) : p.area.includes(q) || p.name.includes(q);
+    const cat = !f.category || p.category === f.category;
+    const con = !f.conditions.length || f.conditions.some(c => p.conds.includes(c));
+    const rad = mode !== 'keyword' || p.distM <= f.radiusKm * 1000;
+    return hit && cat && con && rad;
+  });
+}
+
 /* ───────── 공통 조각 ───────── */
-const btn = (label, a, cls = '', o = '') => `<button type="button" class="b ${cls}" data-a="${a}" ${o}>${label}</button>`;
+const btn = (label, a, cls = '') => `<button type="button" class="b ${cls}" data-a="${a}">${label}</button>`;
 const chip = (label, on, a) => `<button type="button" class="c ${on ? 'on' : ''}" data-a="${a}">${on ? '✓ ' : ''}${label}</button>`;
 const img = (t, cls = '') => `<div class="img ${cls}"><span>${t}</span></div>`;
-const tlabel = t => { const d = new Date(t), h = d.getHours(); return `${h < 12 ? '오전' : '오후'} ${h % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')}`; };
+const fmtTime = t => new Date(t).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
 const dayDiff = t => { const a = new Date(t), b = new Date(); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); return Math.round((b - a) / 864e5); };
 const dirty = () => JSON.stringify(S.pdraft) !== JSON.stringify(S.prefs);
-const fcount = f => { const d = D.defaults.filters; return f.conds.length + (f.radius !== d.radius ? 1 : 0) + (f.cat !== d.cat ? 1 : 0); };
+const empty = (t, s, b = '') => `<div class="dash"><p>${t}</p><p>${s}</p>${b}</div>`;
 
-function pcard(p, { meta, mode = 'list', time = '' }) {
+function pcard(p, { sub, mode = 'list', time = '' }) {
   const saved = S.saved.has(p.id);
   const top = mode === 'list' ? `<button type="button" class="s" data-a="save:${p.id}">${saved ? '저장됨' : '저장'}</button>` : '';
   const foot = mode === 'fav'
@@ -135,12 +176,11 @@ function pcard(p, { meta, mode = 'list', time = '' }) {
     ? `<div class="bt"><span>상세 보기 →</span><button type="button" class="b sm" data-a="place:${p.id}">상세 이동</button></div>` : '';
   return `<div class="card" data-a="place:${p.id}">${img('이미지')}<div class="bd">
     ${time ? `<div>${time}</div>` : ''}<div class="bt"><span>${p.name}</span>${top}</div>
-    <div>${meta}</div><div>${p.tags.join(' · ')}</div>${foot}</div></div>`;
+    <div>${p.category} · ${sub}</div><div>${p.tags.join(' · ')}</div>${foot}</div></div>`;
 }
-const empty = (t, s, b = '') => `<div class="dash"><p>${t}</p><p>${s}</p>${b}</div>`;
 
 const userBlock = seg => `
-  <div class="bt"><div class="user">${img('')}<div class="g"><p>사용자님</p><p>user@example.com</p></div></div>
+  <div class="bt"><div class="user">${img('')}<div class="g"><p>사용자님</p><p>${S.loginEmail || 'user@example.com'}</p></div></div>
     <button type="button" class="b sm" data-a="logout">로그아웃</button></div>
   <div class="sg">${[['08', '취향 설정'], ['09', '즐겨찾기'], ['10', '최근 본 장소']].map(([k, l]) =>
     `<button type="button" class="${seg === k ? 'on' : ''}" data-a="seg:${k}">${l}</button>`).join('')}</div>`;
@@ -148,10 +188,10 @@ const userBlock = seg => `
 /* ───────── 앱바 ───────── */
 const back = `<button type="button" data-a="back">뒤로</button>`;
 const BAR = {
-  '01': () => `<span>PlaceON</span><span>서비스 소개</span>`,
+  '01': () => `<span>PlaceON</span><span class="t"></span><button type="button" data-a="go:04">닫기</button>`,
   '02': () => `${back}<span class="t">로그인</span>`,
   '03': () => `${back}<span class="t">회원가입</span>`,
-  '04': () => `<span>PlaceON</span><button type="button" data-a="loc">위치 변경</button>`,
+  '04': () => `<span>PlaceON</span><span class="t"></span><button type="button" data-a="go:01">서비스 소개</button><button type="button" data-a="loc">위치 변경</button>`,
   '05': () => `<span>장소 검색</span>`,
   '06': () => `${back}<span class="t">검색 조건 설정</span><button type="button" data-a="freset">초기화</button>`,
   '07': () => `${back}<span class="t">장소 상세</span>`,
@@ -159,11 +199,20 @@ const BAR = {
 };
 
 /* ───────── 화면 본문 ───────── */
+const MAPSVG = `<svg width="1000" height="1000" viewBox="0 0 1000 1000" aria-hidden="true">
+  <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#000"/></pattern></defs>
+  <rect width="1000" height="1000" fill="#fff"/>
+  <path d="M0 880C250 820 400 940 650 860S900 800 1000 840V1000H0Z" fill="url(#hatch)" stroke="#000"/>
+  <rect x="640" y="620" width="260" height="190" fill="none" stroke="#000" stroke-dasharray="8 6"/>
+  <path d="M0 0V1000M114 0V1000M205 0V1000M319 0V1000M410 0V1000M501 0V1000M615 0V1000M706 0V1000M820 0V1000M911 0V1000M0 0H1000M0 114H1000M0 205H1000M0 319H1000M0 410H1000M0 501H1000M0 615H1000M0 706H1000M0 820H1000M0 911H1000" stroke="#000" stroke-dasharray="2 8" fill="none"/>
+  <path d="M0 250L1000 650M200 0L760 1000" stroke="#000" stroke-width="2" fill="none"/>
+  <text x="660" y="650">공원 영역</text><text x="40" y="960">강</text></svg>`;
+
 const BODY = {
   '01': () => `
     <p>내 주변에서 찾는<br>나에게 맞는 장소</p>
     <p>취향과 위치를 바탕으로 카페, 공원, 책방 등 가고 싶은 장소를 찾아보세요.</p>
-    ${img('주변 장소 추천 화면 예시 영역', 'h')}
+    ${img('주변 장소 추천 화면', 'h')}
     ${D.intro.map(([t, s]) => `<div class="box"><p>${t}</p><p>${s}</p></div>`).join('')}
     <hr>
     ${btn('로그인', 'go:02', 'p')}
@@ -173,14 +222,13 @@ const BODY = {
   '02': () => { const L = S.login; return `
     <form class="stk" data-form="login" novalidate>
       <p>다시 만나 반가워요</p><p>로그인하고 저장한 취향과 장소를 이어서 확인하세요.</p>
-      <p>이메일</p>
-      <div data-a="input"><input data-in="login.email" placeholder="이메일 주소 입력" value="${L.email}"></div>
+      <p>이메일</p><div><input data-in="loginEmail" placeholder="이메일 주소 입력" value="${S.loginEmail}"></div>
       <p>${L.err.email ? '! ' + L.err.email : ''}</p>
       <p>비밀번호</p>
-      <div class="pw"><div class="field" data-a="input"><input data-in="login.pw" type="${L.show ? 'text' : 'password'}" placeholder="비밀번호 입력" value="${L.pw}"></div>
+      <div class="pw"><div class="field"><input data-in="login.pw" type="${L.show ? 'text' : 'password'}" placeholder="비밀번호 입력" value="${L.pw}"></div>
         <button type="button" data-a="pw">${L.show ? '숨김' : '표시'}</button></div>
       <p>${L.err.pw ? '! ' + L.err.pw : ''}</p>
-      <button type="submit" class="b p" data-a="sub" ${L.busy ? 'disabled' : ''}>${L.busy ? '로그인 중…' : '로그인'}</button>
+      <button type="submit" class="b p" ${L.busy ? 'disabled' : ''}>${L.busy ? '로그인 중…' : '로그인'}</button>
       <div class="box">인증이 완료되면 계정에 연결된 취향, 즐겨찾기와 최근 조회 기록을 불러옵니다.</div>
       <hr><p>아직 계정이 없으신가요?</p>
       ${btn('회원가입으로 이동', 'go:03')}
@@ -189,144 +237,195 @@ const BODY = {
   '03': () => { const g = S.signup; return `
     <form class="stk" data-form="signup" novalidate>
       <p>나만의 장소 찾기 시작</p><p>이메일과 비밀번호로 계정을 만드세요.</p>
-      <p>이메일</p><div data-a="input"><input data-in="signup.email" placeholder="name@example.com" value="${g.email}"></div><p data-err="email"></p>
-      <p>비밀번호</p><div data-a="input"><input data-in="signup.pw" type="password" placeholder="비밀번호 입력" value="${g.pw}"></div>
+      <p>이메일</p><div><input data-in="signup.email" placeholder="name@example.com" value="${g.email}"></div><p data-err="email"></p>
+      <p>비밀번호</p><div><input data-in="signup.pw" type="password" placeholder="비밀번호 입력" value="${g.pw}"></div>
       <p>8자 이상, 영문과 숫자를 함께 입력해 주세요.</p><p data-err="pw"></p>
-      <p>비밀번호 확인</p><div data-a="input"><input data-in="signup.pw2" type="password" placeholder="비밀번호 다시 입력" value="${g.pw2}"></div><p data-err="pw2"></p>
+      <p>비밀번호 확인</p><div><input data-in="signup.pw2" type="password" placeholder="비밀번호 다시 입력" value="${g.pw2}"></div><p data-err="pw2"></p>
       <div class="bt"><button type="button" class="b" style="border:0;text-align:left" data-a="chk:terms">${g.terms ? '[x]' : '[ ]'} [필수] 서비스 이용약관 동의</button><button type="button" class="b sm" data-a="view">보기</button></div>
       <div class="bt"><button type="button" class="b" style="border:0;text-align:left" data-a="chk:priv">${g.priv ? '[x]' : '[ ]'} [필수] 개인정보 수집·이용 동의</button><button type="button" class="b sm" data-a="view">보기</button></div>
       <p data-err="fail"></p>
-      <button type="submit" class="b p" id="sbtn" data-a="sub">동의하고 계정 만들기</button>
+      <button type="submit" class="b p" id="sbtn">동의하고 계정 만들기</button>
       <div class="box">가입 완료 시 계정을 생성하고 사용자 데이터를 저장합니다. 로그인 후 취향과 장소 기록이 이 계정에 연결됩니다.</div>
       ${btn('이미 계정이 있다면 로그인으로 이동 →', 'go:02', 'sm')}
-    </form>
-    <div class="dash"><p>5번 버튼 상태 · 예시</p>
-      <p>비활성 · 기본 — 필수 약관 미동의 또는 입력 조건 미충족</p><button class="b" disabled>동의하고 계정 만들기</button>
-      <p>활성 · 제출 가능 — 이메일 유효 · 비밀번호 규칙 충족 · 확인 일치 · 필수 두 항목 동의</p><button class="b p" type="button">동의하고 계정 만들기</button>
-      <p>요청 중 · 중복 제출 방지</p><button class="b" disabled>계정을 만드는 중…</button>
-      <p>실패 · 재시도 가능</p><button class="b p" type="button">다시 시도</button></div>`; },
+    </form>`; },
 
-  '04': () => {
-    const list = D.places.filter(p => ['p1', 'p4'].includes(p.id) && (S.nearCat === '전체' || p.cat === S.nearCat));
-    return `
-    <p>내 주변, 어디로 갈까요?</p>
-    <p>${S.area ? `${S.area} 지역 기준` : '현재 위치 기준 · 위치 확인 완료'}</p>
-    <form data-form="search"><div class="bt"><div class="field" style="flex:1" data-a="input"><input data-in="query" placeholder="키워드, 장소명 또는 지역 검색" value="${S.query}"></div>
-      <button type="button" data-a="clearq">지우기</button></div></form>
-    <p>${S.err ? '! ' + S.err : ''}</p>
-    ${img('현재 위치 주변 지도', 'm')}
-    <div class="row">${D.nearCats.map(c => chip(c, S.nearCat === c, 'near:' + c)).join('')}</div>
-    <div class="bt"><p>주변 추천 장소</p>${btn('조건 설정', 'filter', 'sm')}</div>
-    ${list.length ? list.map(p => pcard(p, { meta: `${p.cat} · 도보 거리` })).join('') :
-      empty('조건에 맞는 장소가 없어요', '카테고리나 조건을 변경해 보세요.', btn('조건 설정', 'filter', 'sm'))}`; },
+  '04': () => `<div class="home">
+    <div class="homemap"><div id="world">${MAPSVG}<div class="me"><small>내 위치</small></div><div id="pins"></div></div></div>
+    <div class="maptop"><span class="pill">현재 위치 ${S.area} 기준</span><div class="row" id="hcats"></div></div>
+    <div class="ctrl"><button type="button" data-a="zin">확대 +</button><button type="button" data-a="zout">축소 −</button><button type="button" data-a="zme">내 위치</button></div>
+    <section class="sheet">
+      <div class="drag"><div class="grab"><i></i></div>
+        <div class="sheet-head"><p>내 취향 맞춤 추천 <span id="hcount"></span></p><p id="hprefs"></p></div></div>
+      <div class="sheet-list" id="hlist"></div>
+    </section></div>`,
 
   '05': () => {
-    const q = S.query.trim(), area = S.mode === 'area';
-    const res = !q ? [] : area ? [place('p5')] : D.places.filter(p => [p.name, p.cat, ...p.tags].some(x => x.includes(q)));
+    const { query, mode } = S.search, area = mode === 'area', res = searchPlaces();
     return `
-    <form data-form="search"><div class="bt"><div class="field" style="flex:1" data-a="input"><input data-in="query" placeholder="키워드, 지명 또는 장소명" value="${S.query}"></div>
+    <form data-form="search"><div class="bt"><div style="flex:1"><input data-in="search.query" placeholder="키워드, 지명 또는 장소명" value="${query}"></div>
       <button type="button" data-a="clearq">지우기</button></div></form>
     <p>${S.err ? '! ' + S.err : ''}</p>
     <div class="row">${chip('키워드', !area, 'mode:keyword')}${chip('지명·장소명', area, 'mode:area')}</div>
-    <div class="box"><p>${area ? '지명·장소명' : '키워드'} ‘${S.query}’ 검색 결과</p>
-      <p>${area ? `‘${S.query}’ 지역 기준으로 장소를 추천합니다.` : '현재 위치 주변에서 조건에 맞는 장소를 추천합니다.'}</p></div>
+    <div class="box"><p>${area ? '지명·장소명' : '키워드'} ‘${query}’ 검색 결과</p>
+      <p>${area ? `‘${query}’ 지역 기준으로 장소를 추천합니다.` : '현재 위치 주변에서 조건에 맞는 장소를 추천합니다.'}</p></div>
     <div class="bt"><p>추천 결과 ${res.length}개</p>${btn(`필터 · ${fcount(S.applied)}`, 'filter', 'sm')}</div>
-    ${res.length ? res.map(p => pcard(p, { meta: area ? `${p.cat} · 성수동 기준` : `${p.cat} · 현재 위치 주변` })).join('') :
+    ${res.length ? res.map(p => pcard(p, { sub: area ? `${p.area} 기준` : `현재 위치 주변 ${p.dist}` })).join('') :
       empty('조건에 맞는 결과가 없어요', '조건을 줄이거나 검색어를 바꿔 보세요.')}
-    <div class="box"><p>지명·장소명 검색으로 전환하면</p><p>‘성수동’ → 성수동 기준 추천</p><p>장소명 → 해당 장소가 속한 지역 기준 추천</p><p>결과 예시: 골목 책방 · 성수동 기준</p></div>`; },
+    <div class="box"><p>지명·장소명 검색으로 전환하면</p><p>‘성수동’ → 성수동 기준 추천</p><p>장소명 → 해당 장소가 속한 지역 기준 추천</p><p>결과 예시: 골목 책방 · 금호동 기준</p></div>`; },
 
-  '06': () => { const d = S.draft; return `
+  '06': () => { const d = S.draft, q = S.search.query; return `
     <p>추천 기준</p>
-    <div class="box" style="${d.mode === 'keyword' ? 'border-width:3px' : ''}" data-a="fmode:keyword"><p>${d.mode === 'keyword' ? '(●)' : '( )'} 키워드 · ${S.query}</p><p>현재 위치 주변을 기준으로 추천</p></div>
-    <div class="box" style="${d.mode === 'area' ? 'border-width:3px' : ''}" data-a="fmode:area"><p>${d.mode === 'area' ? '(●)' : '( )'} 지명·장소명 · 성수동</p><p>입력한 지역 또는 장소의 지역 기준으로 추천</p></div>
+    <div class="box" style="${d.mode === 'keyword' ? 'border-width:3px' : ''}" data-a="fmode:keyword"><p>${d.mode === 'keyword' ? '(●)' : '( )'} 키워드 · ${q}</p><p>현재 위치 주변을 기준으로 추천</p></div>
+    <div class="box" style="${d.mode === 'area' ? 'border-width:3px' : ''}" data-a="fmode:area"><p>${d.mode === 'area' ? '(●)' : '( )'} 지명·장소명 · ${S.area}</p><p>입력한 지역 또는 장소의 지역 기준으로 추천</p></div>
     <hr>
     <p>기준 위치에서 검색 범위</p>
-    <div class="row">${D.radius.map(k => chip(k + ' km', d.radius === k, 'frad:' + k)).join('')}</div>
+    <div class="row">${D.radiusOptions.map(k => chip(k + ' km', d.radiusKm === k, 'frad:' + k)).join('')}</div>
     <p>장소 카테고리</p>
-    <div class="row">${D.cats.map(c => chip(c, d.cat === c, 'fcat:' + c)).join('')}</div>
+    <div class="row">${D.categories.map(c => chip(c, d.category === c, 'fcat:' + c)).join('')}</div>
     <p>세부 조건 · 복수 선택</p>
-    <div class="row">${D.conds.map(c => chip(c, d.conds.includes(c), 'fcond:' + c)).join('')}</div>
+    <div class="row">${D.conditions.map(c => chip(c, d.conditions.includes(c), 'fcond:' + c)).join('')}</div>
     <div class="box">이번 검색에 적용됩니다. 내 취향 설정은 변경하지 않습니다.</div>
     ${btn('선택한 조건 적용', 'fapply', 'p')}`; },
 
   '07': () => { const p = place(S.placeId), saved = S.saved.has(p.id); return `
     ${img('장소 이미지', 'h')}
-    <p>${p.name}</p><p>${p.cat} · 현재 위치 주변 추천</p>
+    <p>${p.name}</p><p>${p.category} · 현재 위치 주변 ${p.dist}</p>
     <div class="row">${p.tags.map(t => `<span class="box" style="padding:3px 10px">${t}</span>`).join('')}</div>
-    <p>${p.name} 소개 문구 영역 (2~3줄)</p>
+    <p>${p.desc}</p>
     <hr>
-    <p>장소 정보</p><p>주소　예시 지역 · 골목길 12</p><p>운영　운영시간 정보 표시 영역</p><p>시설　좌석 / 이용 조건 표시 영역</p>
+    <p>장소 정보</p><p>주소　${p.address}</p><p>운영　${p.hours}</p><p>시설　${p.facilities}</p>
     ${img('장소 위치 지도 영역', 'm')}
-    ${btn(saved ? '✓ 즐겨찾기 저장됨 · 해제' : '즐겨찾기 저장', 'save:' + p.id, 'p')}
-    <p>장소 상세 조회 시 최근 본 장소에 기록됩니다.</p>`; },
+    ${btn('길찾기', 'route', 'p')}
+    ${btn(saved ? '✓ 즐겨찾기 저장됨 · 해제' : '즐겨찾기에 저장', 'save:' + p.id)}`; },
 
   '08': () => `${userBlock('08')}
     <p>나의 취향 설정</p><p>저장된 취향을 불러왔어요. 선택하거나 수정해 주세요.</p>
     <p>선호 카테고리 · 복수 선택</p>
-    <div class="row">${D.cats.map(c => chip(c, S.pdraft.cats.includes(c), 'pcat:' + c)).join('')}</div>
+    <div class="row">${D.categories.map(c => chip(c, S.pdraft.cats.includes(c), 'pcat:' + c)).join('')}</div>
     <p>세부 조건 · 복수 선택</p>
-    <div class="row">${D.conds.map(c => chip(c, S.pdraft.conds.includes(c), 'pcond:' + c)).join('')}</div>
+    <div class="row">${D.conditions.map(c => chip(c, S.pdraft.conds.includes(c), 'pcond:' + c)).join('')}</div>
     <p>추가 선호 조건</p>
-    <div data-a="input"><input data-in="pdraft.extra" value="${S.pdraft.extra}"></div>
+    <div><input data-in="pdraft.extra" placeholder="예: 창가 좌석이 있는 곳" value="${S.pdraft.extra}"></div>
     <p>${dirty() ? '※ 저장하지 않은 수정이 있어요' : ''}</p>
     ${btn('수정한 취향 저장', 'psave', 'p')}
     <div class="box">저장한 취향은 내 계정에 연결되며, 주변 장소 추천 시 기본 조건으로 사용됩니다.</div>`,
 
   '09': () => {
-    const all = [...S.saved].map(place), cats = ['전체', ...new Set(all.map(p => p.cat))];
-    if (!cats.includes(S.favCat)) S.favCat = '전체';
-    const list = all.filter(p => S.favCat === '전체' || p.cat === S.favCat);
+    const all = [...S.saved].map(place), cats = [...new Set(all.map(p => p.category))];
+    if (S.favCat && !cats.includes(S.favCat)) S.favCat = '';
+    const list = all.filter(p => !S.favCat || p.category === S.favCat);
     return `${userBlock('09')}
     <p>저장한 장소 ${all.length}개</p><p>다시 가고 싶은 장소를 한곳에서 확인하세요.</p>
-    <div class="row">${cats.map(c => chip(c, S.favCat === c, 'favcat:' + c)).join('')}</div>
-    ${!all.length ? empty('저장한 장소가 없어요', '주변 장소를 둘러보고 마음에 드는 곳을 저장해 보세요.', btn('장소 탐색하기', 'tab:nearby', 'sm'))
+    <div class="row">${[['전체', ''], ...cats.map(c => [c, c])].map(([l, v]) => chip(l, S.favCat === v, 'favcat:' + v)).join('')}</div>
+    ${!all.length ? empty('저장한 장소가 없어요', '주변 장소를 둘러보고 마음에 드는 곳을 저장해 보세요.', btn('장소 탐색하기', 'go:04', 'sm'))
       : !list.length ? empty('이 카테고리에 저장한 장소가 없어요', '다른 카테고리를 선택해 보세요.')
-      : list.map(p => pcard(p, { meta: `${p.cat} · 예시 지역`, mode: 'fav' })).join('')}
+      : list.map(p => pcard(p, { sub: p.area, mode: 'fav' })).join('')}
     <p>장소를 누르면 상세로 이동합니다. 저장 해제한 장소는 이 목록에서 제외됩니다.</p>`; },
 
   '10': () => {
     const items = [...S.history].sort((a, b) => b.at - a.at);
     const groups = [['오늘', d => d === 0], ['어제', d => d === 1], ['이전', d => d > 1]];
-    const body = !items.length ? empty('아직 본 장소가 없어요', '장소를 탐색하면 여기에 기록돼요.', btn('장소 탐색하기', 'tab:nearby', 'sm'))
+    const body = !items.length ? empty('아직 본 장소가 없어요', '장소를 탐색하면 여기에 기록돼요.')
       : groups.map(([t, f]) => {
         const rows = items.filter(h => f(dayDiff(h.at)));
         return rows.length ? `<p>${t}</p>` + rows.map(h => pcard(place(h.id), {
-          meta: `${place(h.id).cat} · 예시 지역`, mode: 'recent',
-          time: h === items[0] && dayDiff(h.at) === 0 && Date.now() - h.at < 3e5 ? '방금 확인' : tlabel(h.at)
+          sub: place(h.id).area, mode: 'recent', time: h === items[0] && dayDiff(h.at) === 0 ? '방금 확인' : fmtTime(h.at)
         })).join('') : '';
       }).join('');
     return `${userBlock('10')}<p>최근 본 장소</p><p>상세 정보를 확인한 순서대로 표시됩니다.</p>${body}`; }
 };
 
 /* ───────── 렌더 ───────── */
-const TAB = { '04': 'nearby', '05': 'search', '07': 'search', '08': 'mypage', '09': 'mypage', '10': 'mypage' };
+const TAB = { '04': 'home', '05': 'search', '07': 'search', '08': 'mypage', '09': 'mypage', '10': 'mypage' };
 function render(top) {
   const c = $('#content'), st = top ? 0 : c.scrollTop;
   $('#bar').innerHTML = BAR[S.screen]();
+  c.className = S.screen === '04' ? 'full' : '';
   c.innerHTML = BODY[S.screen]();
   const t = TAB[S.screen], tabs = $('#tabs');
   tabs.hidden = !t;
-  tabs.innerHTML = [['nearby', '주변'], ['search', '검색'], ['mypage', '마이페이지']]
+  tabs.innerHTML = [['home', '홈'], ['search', '검색'], ['mypage', '마이페이지']]
     .map(([k, l]) => `<button type="button" class="${k === t ? 'on' : ''}" data-a="tab:${k}">${l}</button>`).join('');
   c.scrollTop = st;
   if (S.screen === '03') paintSignup();
+  if (S.screen === '04') { homeDraw(); initHome(); }
 }
-const log = t => LOG.push(t);
 function flash(t) {
   document.querySelectorAll('.msg').forEach(m => m.remove());
   const m = Object.assign(document.createElement('div'), { className: 'msg', textContent: t });
   $('#phone').append(m); setTimeout(() => m.remove(), 1600);
 }
-function nav(to, label) {
+function nav(to) {
   if (S.screen === '08' && to !== '08' && dirty()) {
     if (!confirm('저장하지 않은 수정 내용이 있어요. 이동할까요?')) return;
     S.pdraft = structuredClone(S.prefs);
   }
-  LOG.push(`${S.screen} → ${to}${label ? ' · ' + label : ''}`);
   S.screen = to; S.err = ''; render(true);
 }
 
-/* ───────── 회원가입 검증 (입력 중에는 재렌더 없이 부분 갱신) ───────── */
+/* ───────── 홈: 지도(드래그·휠·핀치 줌) + 바텀시트 ───────── */
+const PEEK = 170, MAP = { x: null, y: null, k: null };
+let sheetIdx = 0, HOME = {};
+function homeDraw() {
+  const list = recommend(), { cats, conds } = S.prefs, lst = $('#hlist'), st = lst.scrollTop;
+  $('#hcats').innerHTML = [['전체', ''], ...cats.map(c => [c, c])].map(([l, v]) => chip(l, S.nearCat === v, 'near:' + v)).join('');
+  $('#hcount').textContent = `${list.length}곳`;
+  $('#hprefs').textContent = [...cats, ...conds].join(' · ') || '저장한 취향이 없어요';
+  $('#pins').innerHTML = list.map(p => `<button type="button" class="pin" style="left:${p.pos[0]}px;top:${p.pos[1]}px" data-a="place:${p.id}" aria-label="${p.name}"><small>${p.name}</small><i></i></button>`).join('');
+  lst.innerHTML = list.length ? list.map(p => pcard(p, { sub: `${p.dist} · ${p.walk}` })).join('') : empty('조건에 맞는 장소가 없어요', '취향 설정을 바꿔 보세요.');
+  lst.scrollTop = st;
+}
+function initHome() {
+  const cfg = D.map, M = MAP, box = $('.homemap'), world = $('#world'), sheet = $('.sheet'), home = $('.home'), drag = $('.drag');
+  const R = () => box.getBoundingClientRect();
+  const apply = () => { world.style.transform = `translate(${M.x}px,${M.y}px) scale(${M.k})`; world.style.setProperty('--k', M.k); };
+  const center = () => { const r = R(); M.k = cfg.zoom; M.x = r.width / 2 - cfg.me[0] * M.k; M.y = (r.height - PEEK) / 2 + 20 - cfg.me[1] * M.k; };
+  const zoomAt = (cx, cy, nk) => { nk = Math.min(cfg.maxZoom, Math.max(cfg.minZoom, nk)); const f = nk / M.k; M.x = cx - (cx - M.x) * f; M.y = cy - (cy - M.y) * f; M.k = nk; apply(); };
+  const anim = fn => { world.style.transition = 'transform .3s ease'; fn(); setTimeout(() => world.style.transition = '', 320); };
+  const mid = () => [R().width / 2, (R().height - sheet.offsetHeight) / 2];
+  if (M.x === null) center();
+  apply();
+  HOME = { zin: () => anim(() => zoomAt(...mid(), M.k * 1.4)), zout: () => anim(() => zoomAt(...mid(), M.k / 1.4)), zme: () => anim(() => { center(); apply(); }) };
+
+  const pts = new Map(); let last = 0;
+  const dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]); };
+  box.addEventListener('pointerdown', e => {
+    if (e.target.closest('.pin')) return;
+    box.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+    world.style.transition = ''; if (pts.size === 2) last = dist();
+  });
+  box.addEventListener('pointermove', e => {
+    const p = pts.get(e.pointerId); if (!p) return;
+    const px = p[0], py = p[1]; p[0] = e.clientX; p[1] = e.clientY;
+    if (pts.size === 2) { const [a, b] = [...pts.values()], r = R(), d = dist(); zoomAt((a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top, M.k * d / last); last = d; }
+    else { M.x += p[0] - px; M.y += p[1] - py; apply(); }
+  });
+  ['pointerup', 'pointercancel'].forEach(t => box.addEventListener(t, e => pts.delete(e.pointerId)));
+  box.addEventListener('wheel', e => { e.preventDefault(); const r = R(); zoomAt(e.clientX - r.left, e.clientY - r.top, M.k * (e.deltaY < 0 ? 1.15 : 1 / 1.15)); }, { passive: false });
+
+  const snaps = () => [PEEK, Math.round(R().height * .5), R().height - 60];
+  const setH = (h, a) => {
+    sheet.style.transition = a ? 'height .25s ease' : 'none'; sheet.style.height = h + 'px';
+    home.style.setProperty('--sh', h + 'px'); home.classList.toggle('max', h > snaps()[2] - 20);
+  };
+  setH(snaps()[sheetIdx]);
+  let sy = 0, sh = 0, moved = false, id = null;
+  drag.addEventListener('pointerdown', e => { drag.setPointerCapture(e.pointerId); id = e.pointerId; sy = e.clientY; sh = sheet.offsetHeight; moved = false; });
+  drag.addEventListener('pointermove', e => {
+    if (e.pointerId !== id) return;
+    const dy = e.clientY - sy; if (Math.abs(dy) > 4) moved = true;
+    if (moved) setH(Math.min(snaps()[2], Math.max(PEEK, sh - dy)));
+  });
+  const end = e => {
+    if (e.pointerId !== id) return; id = null;
+    const s = snaps(), h = sheet.offsetHeight;
+    sheetIdx = moved ? s.reduce((b, v, i) => Math.abs(v - h) < Math.abs(s[b] - h) ? i : b, 0) : (sheetIdx + 1) % 3;
+    setH(s[sheetIdx], true);
+  };
+  drag.addEventListener('pointerup', end); drag.addEventListener('pointercancel', end);
+}
+
+/* ───────── 회원가입 검증 (입력 중에는 부분 갱신) ───────── */
 function paintSignup() {
   const g = S.signup, e = isEmail(g.email), p = isPw(g.pw), m = !!g.pw && g.pw === g.pw2, t = g.terms && g.priv, ok = e && p && m && t;
   const set = (k, v) => { const n = $(`[data-err=${k}]`); if (n) n.textContent = v ? '! ' + v : ''; };
@@ -341,57 +440,61 @@ function paintSignup() {
 
 /* ───────── 액션 ───────── */
 const ACT = {
-  go: a => nav(a, '버튼'),
-  back() {
-    const to = { '02': '01', '03': '01', '06': S.filterFrom, '07': S.from }[S.screen];
-    nav(to, '뒤로' + (S.screen === '06' ? ' (적용 없이, 이전 조건 유지)' : ''));
-  },
+  go: a => nav(a),
+  back() { nav({ '02': '01', '03': '01', '06': '05', '07': S.from }[S.screen]); },
   tab(a) {
-    if (a === 'nearby') return nav('04', '하단 탭');
-    if (a === 'search') return nav('05', '하단 탭');
-    if (!S.user) return nav('02', '마이페이지 → 로그인 필요');
-    nav('08', '하단 탭');
+    if (a === 'home') return nav('04');
+    if (a === 'search') return nav('05');
+    nav(S.user ? '08' : '02');
   },
-  seg: a => nav(a, '마이페이지 탭'),
+  seg: a => nav(a),
   place(a) {
     S.placeId = a; S.from = S.screen;
     S.history = [{ id: a, at: Date.now() }, ...S.history.filter(h => h.id !== a)];
-    nav('07', `장소 선택 (${place(a).name}) · 최근 본 장소 기록`);
+    nav('07');
   },
   save(a) {
     const on = !S.saved.has(a);
     on ? S.saved.add(a) : S.saved.delete(a);
-    log(`${S.screen} · ${place(a).name} ${on ? '저장' : '저장 해제'}`);
-    flash(on ? '즐겨찾기에 저장했어요.' : '저장을 해제했어요.'); render();
+    flash(on ? '즐겨찾기에 저장했어요.' : '저장을 해제했어요.');
+    S.screen === '04' ? homeDraw() : render();
   },
-  near(a) { S.nearCat = a; log(`04 · 카테고리 ${a}`); render(); },
-  mode(a) { S.mode = a; log(`05 · 검색 모드 ${a === 'area' ? '지명·장소명' : '키워드'}`); render(); },
-  clearq() { S.query = ''; S.err = ''; log(`${S.screen} · 검색어 지움`); render(); },
-  filter() { S.filterFrom = S.screen; S.draft = { ...structuredClone(S.applied), mode: S.mode }; nav('06', '조건 설정'); },
+  route() {
+    const p = place(S.placeId);
+    window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(p.area + ' ' + p.name), '_blank', 'noopener');
+    flash('길찾기를 새 탭에서 열었어요.');
+  },
+  near(a) { S.nearCat = a; homeDraw(); },
+  zin: () => HOME.zin(), zout: () => HOME.zout(), zme: () => HOME.zme(),
+  loc() {
+    const a = prompt('현재 위치 지역을 입력하세요', S.area);
+    if (a && a.trim()) { S.area = a.trim(); render(); }
+  },
+  mode(a) { S.search.mode = a; render(); },
+  clearq() { S.search.query = ''; S.err = ''; render(); },
+  filter() { S.draft = { ...structuredClone(S.applied), mode: S.search.mode }; nav('06'); },
   fmode(a) { S.draft.mode = a; render(); },
-  frad(a) { S.draft.radius = +a; render(); },
-  fcat(a) { S.draft.cat = S.draft.cat === a ? '' : a; render(); },
-  fcond(a) { S.draft.conds = toggle(S.draft.conds, a); render(); },
-  freset() { S.draft = { ...structuredClone(D.defaults.filters), mode: S.draft.mode }; log('06 · 초기화 (기본값)'); render(); },
-  fapply() { const { mode, ...f } = S.draft; S.applied = f; S.mode = mode; S.draft = null; nav('05', '선택한 조건 적용 → 결과 화면'); },
+  frad(a) { S.draft.radiusKm = +a; render(); },
+  fcat(a) { S.draft.category = S.draft.category === a ? '' : a; render(); },
+  fcond(a) { S.draft.conditions = toggle(S.draft.conditions, a); render(); },
+  freset() { S.draft = { ...structuredClone(D.defaults.filters), mode: S.draft.mode }; render(); },
+  fapply() {
+    const { mode, ...f } = S.draft;
+    S.applied = f; S.search.mode = mode; S.draft = null; nav('05');
+    flash(searchPlaces().length ? '조건을 적용했어요.' : '결과가 없어요. 조건을 줄여 보세요.');
+  },
   pw() { S.login.show = !S.login.show; render(); },
   chk(a) { S.signup[a] = !S.signup[a]; if (S.signup.state !== 'busy') S.signup.state = 'idle'; render(); },
-  view() { flash('약관 내용 확인 경로 (와이어프레임에서는 미구현)'); },
+  view() { flash('약관 내용은 목업에서 제공하지 않아요.'); },
   pcat(a) { S.pdraft.cats = toggle(S.pdraft.cats, a); render(); },
   pcond(a) { S.pdraft.conds = toggle(S.pdraft.conds, a); render(); },
-  psave() { S.prefs = structuredClone(S.pdraft); log('08 · 취향 저장 → 주변 추천 기본 조건으로 사용'); flash('취향을 저장했어요.'); render(); },
+  psave() { S.prefs = structuredClone(S.pdraft); S.nearCat = ''; flash('취향을 저장했어요.'); render(); },
   favcat(a) { S.favCat = a; render(); },
-  logout() { S.user = false; nav('01', '로그아웃 (인증 해제)'); },
-  loc() {
-    const a = prompt('지역 이름을 입력하세요 (비우면 현재 위치 기준)', S.area);
-    if (a === null) return;
-    S.area = a.trim(); log(`04 · 위치 변경 ${S.area || '현재 위치'}`); render();
-  }
+  logout() { S.user = false; flash('로그아웃했어요.'); nav('01'); }
 };
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-a]'); if (!el) return;
   const i = el.dataset.a.indexOf(':'), a = i < 0 ? el.dataset.a : el.dataset.a.slice(0, i), arg = i < 0 ? '' : el.dataset.a.slice(i + 1);
-  if (a === 'sub' || a === 'input') return;          // 폼 제출·입력은 아래 핸들러가 처리
   ACT[a]?.(arg);
 });
 
@@ -405,25 +508,24 @@ const FORM = {
   login() {
     const L = S.login; if (L.busy) return;
     L.err = {};
-    if (!L.email) L.err.email = '이메일을 입력해 주세요.'; else if (!isEmail(L.email)) L.err.email = '이메일 형식을 확인해 주세요.';
+    if (!S.loginEmail) L.err.email = '이메일을 입력해 주세요.'; else if (!isEmail(S.loginEmail)) L.err.email = '이메일 형식을 확인해 주세요.';
     if (!L.pw) L.err.pw = '비밀번호를 입력해 주세요.';
-    if (L.err.email || L.err.pw) { log('02 · 로그인 실패 (입력 오류 안내)'); return render(); }
+    if (L.err.email || L.err.pw) return render();
     L.busy = true; render();
-    setTimeout(() => { L.busy = false; S.user = true; nav('04', '로그인 성공 → 주변 추천 · 취향/즐겨찾기/최근 기록 불러옴'); }, 700);
+    setTimeout(() => { L.busy = false; L.pw = ''; S.user = true; nav('04'); flash('로그인했어요. 저장한 취향을 불러왔어요.'); }, 700);
   },
   signup() {
     const g = S.signup;
     if (g.state === 'busy' || !(isEmail(g.email) && isPw(g.pw) && g.pw === g.pw2 && g.terms && g.priv)) return;
-    g.state = 'busy'; paintSignup(); log('03 · 계정 생성 요청 (중복 제출 방지)');
+    g.state = 'busy'; paintSignup();
     setTimeout(() => {
-      if (g.email.startsWith('fail')) { g.state = 'fail'; log('03 · 계정 생성 실패 (입력·동의 유지)'); paintSignup(); return; }
-      g.state = 'idle'; S.login.email = g.email; nav('02', '계정 생성 완료 → 로그인으로 이동');
+      if (g.email.startsWith('fail')) { g.state = 'fail'; paintSignup(); return; }      // 실패 시연: 이메일이 fail 로 시작
+      g.state = 'idle'; S.loginEmail = g.email; nav('02'); flash('계정을 만들었어요. 로그인해 주세요.');
     }, 800);
   },
   search() {
-    if (!S.query.trim()) { S.err = '검색어를 입력해 주세요.'; log(`${S.screen} · 공백 검색 (입력 안내)`); return render(); }
-    S.err = '';
-    if (S.screen === '04') { S.mode = 'keyword'; nav('05', `검색 “${S.query}” → 검색 결과`); } else { log(`05 · 재검색 “${S.query}”`); render(); }
+    if (!S.search.query.trim()) { S.err = '검색어를 입력해 주세요.'; return render(); }
+    S.err = ''; render();
   }
 };
 document.addEventListener('submit', e => { e.preventDefault(); FORM[e.target.dataset.form]?.(); });
