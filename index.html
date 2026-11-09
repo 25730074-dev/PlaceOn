@@ -164,9 +164,11 @@ function build(raw) {
   Object.keys(D.types).forEach(k => D.types[k] = [...D.types[k]].sort());
 }
 function loadStores() {
-  const t = $('#stores').textContent.trim();
-  if (t && t !== '[]') return Promise.resolve(JSON.parse(t));
-  return fetch('stores.json').then(r => { if (!r.ok) throw 0; return r.json(); });
+  return Promise.resolve().then(() => {
+    const t = $('#stores').textContent.trim();
+    if (t && t !== '[]') return JSON.parse(t);
+    return fetch('stores.json').then(r => { if (!r.ok) throw new Error('fetch'); return r.json(); });
+  }).then(raw => { if (!Array.isArray(raw) || !raw.length) throw new Error('empty'); return raw; });
 }
 
 function init() {
@@ -491,7 +493,7 @@ function paintSignup() {
   set('pw', g.pw && !p ? '8자 이상, 영문과 숫자를 함께 입력해 주세요.' : '');
   set('pw2', g.pw2 && !m ? '비밀번호가 일치하지 않아요.' : '');
   set('fail', g.state === 'fail' ? '계정을 만들지 못했어요. 입력과 동의는 그대로 유지돼요. 다시 시도해 주세요.' : '');
-  const b = $('#sbtn');
+  const b = $('#sbtn'); if (!b) return;   // 가입 처리 중 다른 화면으로 이동한 경우
   b.textContent = { idle: '동의하고 계정 만들기', busy: '계정을 만드는 중…', fail: '다시 시도' }[g.state];
   b.disabled = g.state === 'busy' || (g.state !== 'fail' && !ok);
 }
@@ -571,7 +573,11 @@ const FORM = {
     if (!L.pw) L.err.pw = '비밀번호를 입력해 주세요.';
     if (L.err.email || L.err.pw) return render();
     L.busy = true; render();
-    setTimeout(() => { L.busy = false; L.pw = ''; S.user = true; nav('04'); flash('로그인했어요. 저장한 취향을 불러왔어요.'); }, 700);
+    setTimeout(() => {
+      L.busy = false; L.pw = ''; S.user = true;
+      if (S.screen === '02') nav('04');   // 그 사이 다른 화면으로 이동했다면 강제 이동하지 않음
+      flash('로그인했어요. 저장한 취향을 불러왔어요.');
+    }, 700);
   },
   signup() {
     const g = S.signup;
@@ -579,7 +585,9 @@ const FORM = {
     g.state = 'busy'; paintSignup();
     setTimeout(() => {
       if (g.email.startsWith('fail')) { g.state = 'fail'; paintSignup(); return; }      // 실패 시연: 이메일이 fail 로 시작
-      g.state = 'idle'; S.loginEmail = g.email; nav('02'); flash('계정을 만들었어요. 로그인해 주세요.');
+      g.state = 'idle'; S.loginEmail = g.email;
+      if (S.screen !== '03') return;
+      nav('02'); flash('계정을 만들었어요. 로그인해 주세요.');
     }, 800);
   },
   search() {
@@ -590,8 +598,9 @@ const FORM = {
 document.addEventListener('submit', e => { e.preventDefault(); FORM[e.target.dataset.form]?.(); });
 
 /* ───────── 시작 ───────── */
-loadStores().then(raw => { build(raw); init(); render(true); })
-  .catch(() => {
+loadStores().then(
+  raw => { build(raw); init(); render(true); },      // 변환·렌더 오류는 '데이터 불러오기 실패'로 가려지지 않고 콘솔에 표시됨
+  () => {
     $('#content').innerHTML = '<div class="dash"><p>장소 데이터를 불러오지 못했어요.</p><p>① stores.json 을 이 파일과 같은 폴더에 두고 로컬 서버로 열거나,<br>② &lt;script id="stores"&gt; 안의 [] 를 stores.json 내용으로 바꿔 주세요.</p></div>';
   });
 </script>
