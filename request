@@ -3,6 +3,5 @@
 7, 8주차 내용 검토
 
 [GitHub]
-lofi-wirefrae index.html 파일 수정
-JSON 데이터와 연동
 wireframe 인터페이스 확인
+JSON 데이터 - 지도용 좌표 필요(위도, 경도)
