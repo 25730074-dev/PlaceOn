@@ -9,21 +9,20 @@
 *{box-sizing:border-box;margin:0;padding:0;font:inherit;color:#000;border-radius:0}
 html{font:16px/1.5 sans-serif;-webkit-text-size-adjust:100%}
 html,body{height:100%;overscroll-behavior:none}
-body{background:#fff;display:flex;justify-content:center}
+body{background:#fff;display:flex;justify-content:center;align-items:center;padding:24px 8px}
 button,input{background:#fff;border:1px solid #000;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 input{cursor:text;padding:12px;width:100%;outline:none}
 input:focus{outline:2px solid #000;outline-offset:1px}
 hr{border:0;border-top:1px solid #000}
 
-.phone{width:100%;max-width:430px;height:100vh;height:100dvh;display:flex;flex-direction:column;position:relative}
-@media(min-width:431px){.phone{border-inline:2px solid #000}}
-#bar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top));border-bottom:1px solid #000;min-height:56px}
+.phone{width:100%;max-width:430px;height:min(calc(100vh - 48px),860px);height:min(calc(100dvh - 48px),860px);border:2px solid #000;display:flex;flex-direction:column;position:relative}
+#bar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid #000;min-height:56px}
 #bar button{min-height:44px;padding:4px 14px}
 #bar .t{flex:1}
 #content{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
 #content.full{padding:0;overflow:hidden;position:relative}
 #content>*+*,.stk>*+*{margin-top:12px}
-#tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #000;padding-bottom:env(safe-area-inset-bottom)}
+#tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #000}
 #tabs button{border:0;border-left:1px solid #000;min-height:56px}
 #tabs button:first-child{border-left:0}
 #tabs button.on,.c.on,.sg button.on{background:#000;color:#fff}
@@ -35,6 +34,9 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 .c{min-height:44px;padding:8px 14px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .bt{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bt>button{flex:none;white-space:nowrap}
+.bt>span{min-width:0;overflow-wrap:anywhere;word-break:keep-all}
+.card .bt{align-items:flex-start}
 .box{border:1px solid #000;padding:12px}
 .dash{border:1px dashed #000;padding:12px}
 .card{display:flex;gap:12px;border:1px solid #000;padding:12px;cursor:pointer;position:relative;background:#fff}
@@ -52,27 +54,41 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 .user .img{width:44px;height:44px;flex:none}
 .user .g{flex:1}
 .pw{display:flex;gap:8px}
+.ck{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid #000;flex:none;line-height:1}
+.ck.sm{width:18px;height:18px;font-size:12px}
+.ckb{border:0;display:flex;align-items:center;gap:10px;text-align:left;min-height:44px;padding:0}
+.bt>.ckb{flex:1;white-space:normal}
+.rule{display:flex;gap:8px;align-items:center}
+[data-rules]>*+*{margin-top:4px}
+.kv{display:grid;grid-template-columns:64px 1fr;gap:12px 20px}
+.kv>span{min-width:0;overflow-wrap:anywhere;word-break:keep-all}
 .pw .field{flex:1}
-.msg{position:absolute;left:16px;right:16px;bottom:calc(72px + env(safe-area-inset-bottom));border:2px solid #000;background:#fff;padding:8px 12px;z-index:9}
+.msg{position:absolute;left:16px;right:16px;bottom:72px;border:2px solid #000;background:#fff;padding:8px 12px;z-index:9}
 
 /* 홈: 전체 화면 지도 + 바텀시트 */
-.home{position:absolute;inset:0;overflow:hidden;--sh:170px}
+.home{position:absolute;inset:0;overflow:hidden;--sh:120px}
 .homemap{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;background:#fff;cursor:grab}
-#world{position:absolute;left:0;top:0;width:1000px;height:1000px;transform-origin:0 0}
+#world{position:absolute;left:0;top:0;transform-origin:0 0}
 #world svg{display:block;pointer-events:none}
 .pin{position:absolute;z-index:3;transform:translate(-50%,-100%) scale(calc(1 / var(--k,1)));transform-origin:50% 100%;border:0;background:none;padding:0;min-height:0;display:flex;flex-direction:column;align-items:center;gap:2px}
 .pin i{display:block;width:14px;height:14px;background:#000}
 .pin small,.me small{font-size:12px;border:1px solid #000;background:#fff;padding:0 6px;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
-.me{position:absolute;left:500px;top:500px;z-index:2;width:18px;height:18px;border-radius:50%;background:#000;border:3px solid #fff;box-shadow:0 0 0 2px #000;transform:translate(-50%,-50%) scale(calc(1 / var(--k,1)))}
+.me{position:absolute;z-index:2;width:18px;height:18px;border-radius:50%;background:#000;border:3px solid #fff;box-shadow:0 0 0 2px #000;transform:translate(-50%,-50%) scale(calc(1 / var(--k,1)))}
 .me small{position:absolute;top:28px;left:50%;transform:translateX(-50%)}
 .maptop{position:absolute;top:10px;left:10px;right:10px;z-index:5;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .maptop>*{pointer-events:auto;align-self:flex-start}
 .pill{border:1px solid #000;background:#fff;padding:4px 12px}
 .maptop .dash{background:#fff;padding:2px 8px;font-size:12px}
 .ctrl{position:absolute;right:10px;bottom:calc(var(--sh) + 12px);z-index:5;display:flex;flex-direction:column;gap:6px}
-.ctrl button{width:56px;min-height:44px;padding:0}
+.ctrl{align-items:flex-end}
+.ctrl button{min-width:44px;min-height:44px;padding:0 10px}
 .home.max .ctrl{display:none}
-.sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;height:170px;background:#fff;border-top:2px solid #000;display:flex;flex-direction:column}
+.pop{position:absolute;inset:0;z-index:12;display:flex;align-items:center;justify-content:center;padding:24px}
+.pop[hidden]{display:none}
+.popbg{position:absolute;inset:0}
+.popbox{position:relative;width:100%;max-height:80%;overflow:auto;background:#fff;border:2px solid #000;padding:16px}
+.popbox>*+*{margin-top:12px}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;height:120px;background:#fff;border-top:2px solid #000;display:flex;flex-direction:column}
 .drag{touch-action:none;cursor:grab;flex:none}
 .grab{padding:10px 0;display:grid;place-items:center}
 .grab i{display:block;width:40px;height:4px;background:#000}
@@ -92,7 +108,7 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 <!-- 앱 설정 (장소 데이터는 아래 stores 블록) -->
 <script type="application/json" id="data">
 {
-  "map": {"me": [500, 500], "zoom": 0.75, "minZoom": 0.4, "maxZoom": 2.5},
+  "map": {"size": 2400, "me": [1200, 1200], "zoom": 1, "minZoom": 0.4, "maxZoom": 2.5},
   "pageSize": 20,
   "intro": [
     ["가까운 장소 추천", "현재 위치 주변의 장소를 살펴보세요."],
@@ -113,8 +129,24 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 <script>
 const D = JSON.parse(document.getElementById('data').textContent);
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const isEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-const isPw = v => v.length >= 8 && /[A-Za-z]/.test(v) && /\d/.test(v);
+const nickHint = v => {                      // 충족하지 못한 조건만 한 줄로
+  const n = [...v].length, bad = [...v].filter(c => !/[가-힣A-Za-z0-9]/.test(c)).length, miss = [];
+  if (n < 2 || n > 12) miss.push('2~12자');
+  if (n === 0 || bad > 0) miss.push('한글·영문·숫자만');
+  return miss.length ? { ok: false, text: miss.join(', ') } : { ok: true, text: '사용 가능한 닉네임이에요' };
+};
+const pwHint = v => {
+  const miss = [], inc = [];
+  if (v.length < 8) miss.push('8자 이상'); else if (v.length > 20) miss.push('20자 이하');
+  if (!/[A-Z]/.test(v)) inc.push('대문자');
+  if (!/[0-9]/.test(v)) inc.push('숫자');
+  if (!/[^A-Za-z0-9\s]/.test(v)) inc.push('특수문자');
+  if (inc.length) miss.push(inc.join('·') + ' 포함');
+  if (/\s/.test(v)) miss.push('공백 제외');
+  return miss.length ? { ok: false, text: miss.join(', ') } : { ok: true, text: '사용 가능한 비밀번호예요' };
+};
+const hintText = h => (h.ok ? '✓ ' : '') + h.text;
+const signupOk = g => nickHint(g.nick).ok && pwHint(g.pw).ok && !!g.pw && g.pw === g.pw2 && g.terms && g.priv;
 const toggle = (a, v) => a.includes(v) ? a.filter(x => x !== v) : [...a, v];
 const countBy = (arr, f) => { const m = new Map(); arr.forEach(x => m.set(f(x), (m.get(f(x)) || 0) + 1)); return m; };
 const byCount = m => [...m.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]);
@@ -147,7 +179,7 @@ function init() {
   const pick = (cat, type) => STORES.find(s => s.area === d.area && s.category === cat && (!type || s.type === type)) || STORES.find(s => s.category === cat);
   const a = pick('카페/디저트', '카페/음료'), b = pick('음식점', '한식'), c = pick('카페/디저트', '베이커리'), e = pick('음식점', '양식'), f = pick('문화/여가');
   S = {
-    screen: '01', user: false, err: '', loginEmail: '',
+    screen: '01', user: false, err: '', loginNick: '', popCat: '',
     area: d.area, search: { ...d.search }, applied: noFilter(), draft: null, nearCat: '',
     prefs: structuredClone(d.prefs), pdraft: structuredClone(d.prefs), favCat: '',
     saved: new Set([a.id, b.id, c.id]),
@@ -155,16 +187,16 @@ function init() {
     shown: { home: 1, search: 1 },
     placeId: null, from: '04',
     login: { pw: '', show: false, busy: false, err: {} },
-    signup: { email: '', pw: '', pw2: '', terms: false, priv: false, state: 'idle' }
+    signup: { nick: '', pw: '', pw2: '', terms: false, priv: false, state: 'idle' }
   };
 }
 
 /* ───────── 추천·검색 로직 ───────── */
-function recommend() {                     // 홈: 현재 위치(행정동) 기준 + 저장된 취향
+const scoreOf = p => (S.prefs.cats.includes(p.category) ? 2 : 0) + (S.prefs.types.includes(p.type) ? 1 : 0);
+function recommend() {                     // 홈: 현재 위치(행정동) 기준. 필터 팝업에서 카테고리를 고르면 그 카테고리 전체, 아니면 취향 기반
   const { cats, types } = S.prefs, any = cats.length || types.length;
-  const score = p => (cats.includes(p.category) ? 2 : 0) + (types.includes(p.type) ? 1 : 0);
-  return STORES.filter(p => (!S.area || p.area === S.area) && (!any || score(p) > 0) && (!S.nearCat || p.category === S.nearCat))
-    .sort((a, b) => score(b) - score(a) || a.id - b.id);
+  return STORES.filter(p => (!S.area || p.area === S.area) && (S.nearCat ? p.category === S.nearCat : (!any || scoreOf(p) > 0)))
+    .sort((a, b) => scoreOf(b) - scoreOf(a) || a.id - b.id);
 }
 function searchStores() {                  // 검색: 키워드(업소명·카테고리·업태) / 지명·장소명(행정동·주소·업소명) + 적용 필터
   const q = S.search.query.trim(), f = S.applied;
@@ -195,11 +227,11 @@ function pcard(p, { mode = 'list', time = '' } = {}) {
     ? `<div class="bt"><span>상세 보기 →</span><button type="button" class="b sm" data-a="place:${p.id}">상세 이동</button></div>` : '';
   return `<div class="card" data-a="place:${p.id}">${img('이미지')}<div class="bd">
     ${time ? `<div>${time}</div>` : ''}<div class="bt"><span>${p.name}</span>${top}</div>
-    <div>${p.category} · ${p.type || '업태 정보 없음'}</div><div>${p.area || '지역 정보 없음'} · ${floorText(p)}</div>${foot}</div></div>`;
+    <div>내 위치에서 ${distText(p)}</div><div>${p.category} · ${p.type || '업태 정보 없음'}</div><div>${p.area || '지역 정보 없음'} · ${floorText(p)}</div>${foot}</div></div>`;
 }
 
 const userBlock = seg => `
-  <div class="bt"><div class="user">${img('')}<div class="g"><p>사용자님</p><p>${S.loginEmail || 'user@example.com'}</p></div></div>
+  <div class="bt"><div class="user">${img('')}<div class="g"><p>${S.loginNick || '사용자'}님</p></div></div>
     <button type="button" class="b sm" data-a="logout">로그아웃</button></div>
   <div class="sg">${[['08', '취향 설정'], ['09', '즐겨찾기'], ['10', '최근 본 장소']].map(([k, l]) =>
     `<button type="button" class="${seg === k ? 'on' : ''}" data-a="seg:${k}">${l}</button>`).join('')}</div>`;
@@ -208,7 +240,7 @@ const userBlock = seg => `
 const back = `<button type="button" data-a="back">뒤로</button>`;
 const BAR = {
   '01': () => `<span>PlaceON</span><span class="t"></span><button type="button" data-a="go:04">닫기</button>`,
-  '02': () => `${back}<span class="t">로그인</span>`,
+  '02': () => `<span class="t">로그인</span><button type="button" data-a="back" aria-label="닫기">X</button>`,
   '03': () => `${back}<span class="t">회원가입</span>`,
   '04': () => `<span>PlaceON</span><span class="t"></span><button type="button" data-a="go:01">서비스 소개</button><button type="button" data-a="loc">위치 변경</button>`,
   '05': () => `<span>장소 검색</span>`,
@@ -218,14 +250,16 @@ const BAR = {
 };
 
 /* ───────── 화면 본문 ───────── */
-const MAPSVG = `<svg width="1000" height="1000" viewBox="0 0 1000 1000" aria-hidden="true">
-  <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#000"/></pattern></defs>
-  <rect width="1000" height="1000" fill="#fff"/>
-  <path d="M0 880C250 820 400 940 650 860S900 800 1000 840V1000H0Z" fill="url(#hatch)" stroke="#000"/>
-  <rect x="640" y="620" width="260" height="190" fill="none" stroke="#000" stroke-dasharray="8 6"/>
-  <path d="M0 0V1000M114 0V1000M205 0V1000M319 0V1000M410 0V1000M501 0V1000M615 0V1000M706 0V1000M820 0V1000M911 0V1000M0 0H1000M0 114H1000M0 205H1000M0 319H1000M0 410H1000M0 501H1000M0 615H1000M0 706H1000M0 820H1000M0 911H1000" stroke="#000" stroke-dasharray="2 8" fill="none"/>
-  <path d="M0 250L1000 650M200 0L760 1000" stroke="#000" stroke-width="2" fill="none"/>
-  <text x="660" y="650">공원 영역</text><text x="40" y="960">강</text></svg>`;
+const MS = D.map.size, MAPSVG = `<svg width="${MS}" height="${MS}" viewBox="0 0 ${MS} ${MS}" aria-hidden="true">
+  <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#000"/></pattern>
+    <pattern id="grid" width="120" height="120" patternUnits="userSpaceOnUse"><path d="M0 0H120M0 0V120" stroke="#000" stroke-dasharray="2 8" fill="none"/></pattern></defs>
+  <rect width="${MS}" height="${MS}" fill="#fff"/><rect width="${MS}" height="${MS}" fill="url(#grid)"/>
+  <path d="M0 ${MS * .86}C${MS * .25} ${MS * .8} ${MS * .4} ${MS * .94} ${MS * .65} ${MS * .87}S${MS * .9} ${MS * .8} ${MS} ${MS * .84}V${MS}H0Z" fill="url(#hatch)" stroke="#000"/>
+  <rect x="${MS * .62}" y="${MS * .55}" width="420" height="300" fill="none" stroke="#000" stroke-dasharray="8 6"/>
+  <rect x="${MS * .1}" y="${MS * .12}" width="360" height="260" fill="none" stroke="#000" stroke-dasharray="8 6"/>
+  <rect x="${MS * .7}" y="${MS * .1}" width="300" height="220" fill="none" stroke="#000" stroke-dasharray="8 6"/>
+  <path d="M0 ${MS * .3}L${MS} ${MS * .55}M${MS * .2} 0L${MS * .7} ${MS}M0 ${MS * .62}H${MS}M${MS * .5} 0V${MS}M${MS * .85} 0L${MS * .3} ${MS}" stroke="#000" stroke-width="2" fill="none"/>
+  <text x="${MS * .62 + 20}" y="${MS * .55 + 40}">공원 영역</text><text x="${MS * .1 + 20}" y="${MS * .12 + 40}">공원 영역</text><text x="${MS * .7 + 20}" y="${MS * .1 + 40}">공원 영역</text><text x="40" y="${MS - 40}">강</text></svg>`;
 
 const BODY = {
   '01': () => `
@@ -235,14 +269,14 @@ const BODY = {
     ${D.intro.map(([t, s]) => `<div class="box"><p>${t}</p><p>${s}</p></div>`).join('')}
     <hr>
     ${btn('로그인', 'go:02', 'p')}
-    ${btn('이메일로 회원가입', 'go:03')}
+    ${btn('회원가입', 'go:03')}
     <p>계정에 취향, 저장 장소와 조회 기록이 연결됩니다.</p>`,
 
   '02': () => { const L = S.login; return `
     <form class="stk" data-form="login" novalidate>
       <p>다시 만나 반가워요</p><p>로그인하고 저장한 취향과 장소를 이어서 확인하세요.</p>
-      <p>이메일</p><div><input data-in="loginEmail" placeholder="이메일 주소 입력" value="${S.loginEmail}"></div>
-      <p>${L.err.email ? '! ' + L.err.email : ''}</p>
+      <p>닉네임</p><div><input data-in="loginNick" placeholder="닉네임 입력" autocomplete="off" value="${S.loginNick}"></div>
+      <p>${L.err.nick ? '! ' + L.err.nick : ''}</p>
       <p>비밀번호</p>
       <div class="pw"><div class="field"><input data-in="login.pw" type="${L.show ? 'text' : 'password'}" placeholder="비밀번호 입력" value="${L.pw}"></div>
         <button type="button" data-a="pw">${L.show ? '숨김' : '표시'}</button></div>
@@ -255,13 +289,14 @@ const BODY = {
 
   '03': () => { const g = S.signup; return `
     <form class="stk" data-form="signup" novalidate>
-      <p>나만의 장소 찾기 시작</p><p>이메일과 비밀번호로 계정을 만드세요.</p>
-      <p>이메일</p><div><input data-in="signup.email" placeholder="name@example.com" value="${g.email}"></div><p data-err="email"></p>
+      <p>나만의 장소 찾기 시작</p><p>닉네임과 비밀번호로 계정을 만드세요.</p>
+      <p>닉네임</p><div><input data-in="signup.nick" placeholder="닉네임 입력" autocomplete="off" value="${g.nick}"></div>
+      <p data-hint="nick">${hintText(nickHint(g.nick))}</p>
       <p>비밀번호</p><div><input data-in="signup.pw" type="password" placeholder="비밀번호 입력" value="${g.pw}"></div>
-      <p>8자 이상, 영문과 숫자를 함께 입력해 주세요.</p><p data-err="pw"></p>
+      <p data-hint="pw">${hintText(pwHint(g.pw))}</p>
       <p>비밀번호 확인</p><div><input data-in="signup.pw2" type="password" placeholder="비밀번호 다시 입력" value="${g.pw2}"></div><p data-err="pw2"></p>
-      <div class="bt"><button type="button" class="b" style="border:0;text-align:left" data-a="chk:terms">${g.terms ? '[x]' : '[ ]'} [필수] 서비스 이용약관 동의</button><button type="button" class="b sm" data-a="view">보기</button></div>
-      <div class="bt"><button type="button" class="b" style="border:0;text-align:left" data-a="chk:priv">${g.priv ? '[x]' : '[ ]'} [필수] 개인정보 수집·이용 동의</button><button type="button" class="b sm" data-a="view">보기</button></div>
+      <div class="bt"><button type="button" class="ckb" data-a="chk:terms"><span class="ck">${g.terms ? '✓' : ''}</span><span>[필수] 서비스 이용약관 동의</span></button><button type="button" class="b sm" data-a="view">보기</button></div>
+      <div class="bt"><button type="button" class="ckb" data-a="chk:priv"><span class="ck">${g.priv ? '✓' : ''}</span><span>[필수] 개인정보 수집·이용 동의</span></button><button type="button" class="b sm" data-a="view">보기</button></div>
       <p data-err="fail"></p>
       <button type="submit" class="b p" id="sbtn">동의하고 계정 만들기</button>
       <div class="box">가입 완료 시 계정을 생성하고 사용자 데이터를 저장합니다. 로그인 후 취향과 장소 기록이 이 계정에 연결됩니다.</div>
@@ -269,14 +304,17 @@ const BODY = {
     </form>`; },
 
   '04': () => `<div class="home">
-    <div class="homemap"><div id="world">${MAPSVG}<div class="me"><small>내 위치</small></div><div id="pins"></div></div></div>
-    <div class="maptop"><span class="pill">현재 위치 ${S.area} 기준</span><div class="row" id="hcats"></div><div class="dash">※ 좌표 데이터 없음 · 핀은 임의 배치</div></div>
-    <div class="ctrl"><button type="button" data-a="zin">확대 +</button><button type="button" data-a="zout">축소 −</button><button type="button" data-a="zme">내 위치</button></div>
+    <div class="homemap"><div id="world" style="width:${MS}px;height:${MS}px">${MAPSVG}<div class="me" style="left:${D.map.me[0]}px;top:${D.map.me[1]}px"><small>내 위치</small></div><div id="pins"></div></div></div>
+    <div class="maptop"><span class="pill">현재 위치 ${S.area} 기준</span><button type="button" class="b sm" id="hfbtn" data-a="hfopen"></button><div class="dash" id="hstat">※ 좌표 데이터 없음 · 핀·거리는 임의 배치</div></div>
+    <div class="ctrl"><button type="button" data-a="zin" aria-label="확대">+</button><button type="button" data-a="zout" aria-label="축소">−</button><button type="button" data-a="zme">내 위치</button></div>
     <section class="sheet">
       <div class="drag"><div class="grab"><i></i></div>
         <div class="sheet-head"><p>내 취향 맞춤 추천 <span id="hcount"></span></p><p id="hprefs"></p></div></div>
       <div class="sheet-list" id="hlist"></div>
-    </section></div>`,
+    </section>
+    <div class="pop" id="pop" hidden><div class="popbg" data-a="hfclose"></div>
+      <div class="popbox"><p>카테고리 필터</p><div class="row" id="popchips"></div>
+        <div class="bt"><button type="button" class="b sm" data-a="hfclose">닫기</button><button type="button" class="b p sm" data-a="hfapply">적용</button></div></div></div></div>`,
 
   '05': () => {
     const { query, mode } = S.search, area = mode === 'area', res = searchStores();
@@ -315,7 +353,7 @@ const BODY = {
     <p>${p.name}</p><p>${p.category} · ${p.type || '업태 정보 없음'}</p>
     <div class="row">${[p.area, ...p.floors].filter(Boolean).map(t => `<span class="box" style="padding:3px 10px">${t}</span>`).join('')}</div>
     <hr>
-    <p>장소 정보</p><p>도로명　${p.address || none}</p><p>지번　${p.jibun || none}</p><p>지역　${p.area || none}</p><p>위치　${floorText(p)}</p>
+    <p>장소 정보</p><div class="kv"><span>도로명</span><span>${p.address || none}</span><span>지번</span><span>${p.jibun || none}</span><span>지역</span><span>${p.area || none}</span><span>위치</span><span>${floorText(p)}</span></div>
     ${img('장소 위치 지도 영역', 'm')}
     ${btn('길찾기', 'route', 'p')}
     ${btn(saved ? '✓ 즐겨찾기 저장됨 · 해제' : '즐겨찾기에 저장', 'save:' + p.id)}`; },
@@ -372,7 +410,7 @@ function render(top) {
     .map(([k, l]) => `<button type="button" class="${k === t ? 'on' : ''}" data-a="tab:${k}">${l}</button>`).join('');
   c.scrollTop = st;
   if (S.screen === '03') paintSignup();
-  if (S.screen === '04') { homeDraw(); initHome(); }
+  if (S.screen === '04') { initHome(); homeDraw(); }
 }
 function flash(t) {
   document.querySelectorAll('.msg').forEach(m => m.remove());
@@ -388,23 +426,60 @@ function nav(to) {
 }
 
 /* ───────── 홈: 지도(드래그·휠·핀치 줌) + 바텀시트 ───────── */
-const PEEK = 170, MAP = { x: null, y: null, k: null };
-let sheetIdx = 0, HOME = {};
-const pinPos = p => [80 + (p.id * 137) % 840, 80 + (p.id * 251) % 840];      // 좌표 데이터가 없어 id 기반 임의 배치
-function homeDraw() {
-  const list = recommend(), { cats, types } = S.prefs, lst = $('#hlist'), st = lst.scrollTop;
-  const vis = list.slice(0, pageOf(S.shown.home));
-  $('#hcats').innerHTML = [['전체', ''], ...cats.map(c => [c, c])].map(([l, v]) => chip(l, S.nearCat === v, 'near:' + v)).join('');
-  $('#hcount').textContent = `${list.length}곳`;
+const PEEK = 120, MAP = { x: null, y: null, k: null };
+let sheetIdx = 0, HOME = {}, POOL = [], lastSig = '', vtm = 0;
+const distText = p => { const [x, y] = pinPos(p), [cx, cy] = D.map.me, m = Math.round(Math.hypot(x - cx, y - cy) / 10) * 10;   // 지도 1px = 1m (임의 배치 좌표 기준)
+  return m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`; };
+const pinPos = p => {                       // 좌표 데이터가 없어 id 기반으로 내 위치 주변에 임의 배치
+  const [cx, cy] = D.map.me, r = Math.sqrt((Math.imul(p.id, 2654435761) >>> 0) / 4294967296) * 1100;
+  const a = (Math.imul(p.id + 7, 2246822519) >>> 0) / 4294967296 * 2 * Math.PI;
+  return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+};
+const viewRect = (m = 0) => { const r = $('.homemap').getBoundingClientRect(), k = MAP.k; return [(-MAP.x - m) / k, (-MAP.y - m) / k, (r.width - MAP.x + m) / k, (r.height - MAP.y + m) / k]; };
+const inView = (pos, v) => pos[0] >= v[0] && pos[0] <= v[2] && pos[1] >= v[1] && pos[1] <= v[3];
+
+function drawPins() {                       // 화면 안(+여유 200px)에 들어온 장소만 핀으로 로드, 벗어난 핀은 제거
+  const box = $('#pins'); if (!box) return;
+  const want = POOL.filter(o => inView(o.pos, viewRect(200))), ids = new Set(want.map(o => String(o.p.id)));
+  const have = new Set([...box.children].map(c => c.dataset.id));
+  [...box.children].forEach(c => { if (!ids.has(c.dataset.id)) c.remove(); });
+  want.forEach(({ p, pos }) => { if (!have.has(String(p.id))) box.insertAdjacentHTML('beforeend',
+    `<button type="button" class="pin" data-id="${p.id}" style="left:${pos[0]}px;top:${pos[1]}px" data-a="place:${p.id}" aria-label="${p.name}"><small>${p.name}</small><i></i></button>`); });
+}
+function scheduleView() {                   // 이동이 멈추면(0.2초) 시트 목록을 지도 영역 기준으로 다시 로드
+  const st = $('#hstat'); if (st) st.textContent = '지도 영역 불러오는 중…';
+  clearTimeout(vtm); vtm = setTimeout(() => drawView(), 200);
+}
+function drawView(force) {
+  const lst = $('#hlist'); if (!lst) return;
+  const v = viewRect(0), items = POOL.filter(o => inView(o.pos, v)).map(o => o.p).sort((a, b) => scoreOf(b) - scoreOf(a) || a.id - b.id);
+  const sig = items.map(p => p.id).join(','), changed = sig !== lastSig; lastSig = sig;
+  const stat = `보이는 영역 ${items.length}곳 불러옴 · 좌표 없음(핀·거리 임의 배치)`;
+  if (!changed && !force) { $('#hstat').textContent = stat; return; }
+  if (changed && !force) S.shown.home = 1;
+  const st = lst.scrollTop;
+  $('#hcount').textContent = `지도 영역 ${items.length}곳 · 전체 ${POOL.length}곳`;
+  lst.innerHTML = items.length ? items.slice(0, pageOf(S.shown.home)).map(p => pcard(p)).join('') + moreBtn('home', items.length)
+    : empty('이 지도 영역에 장소가 없어요', '지도를 움직이거나 확대·축소해 보세요.');
+  lst.scrollTop = changed && !force ? 0 : st;
+  $('#hstat').textContent = stat;
+}
+const drawPop = () => { $('#popchips').innerHTML = [['전체', ''], ...CATS.map(c => [c, c])].map(([l, v]) => chip(l, S.popCat === v, 'hfpick:' + v)).join(''); };
+function homeDraw() {                       // 칩·취향·추천 풀이 바뀔 때 (지도 위치는 유지)
+  const { cats, types } = S.prefs;
+  POOL = recommend().map(p => ({ p, pos: pinPos(p) }));
+  $('#hfbtn').textContent = `필터 · ${S.nearCat || '전체'}`;
   $('#hprefs').textContent = [...cats, ...types].join(' · ') || '저장한 취향이 없어요';
-  $('#pins').innerHTML = vis.map(p => { const [x, y] = pinPos(p); return `<button type="button" class="pin" style="left:${x}px;top:${y}px" data-a="place:${p.id}" aria-label="${p.name}"><small>${p.name}</small><i></i></button>`; }).join('');
-  lst.innerHTML = list.length ? vis.map(p => pcard(p)).join('') + moreBtn('home', list.length) : empty(`${S.area || '이 지역'}에 맞는 장소가 없어요`, '위치를 바꾸거나 취향 설정을 바꿔 보세요.');
-  lst.scrollTop = st;
+  $('#pins').innerHTML = ''; drawPins();
+  lastSig = ''; drawView(true);
 }
 function initHome() {
   const cfg = D.map, M = MAP, box = $('.homemap'), world = $('#world'), sheet = $('.sheet'), home = $('.home'), drag = $('.drag');
   const R = () => box.getBoundingClientRect();
-  const apply = () => { world.style.transform = `translate(${M.x}px,${M.y}px) scale(${M.k})`; world.style.setProperty('--k', M.k); };
+  const clamp = () => { const r = R(), W = cfg.size * M.k;                 // 지도 가장자리 밖으로 나가지 않게
+    M.x = W <= r.width ? (r.width - W) / 2 : Math.min(0, Math.max(r.width - W, M.x));
+    M.y = W <= r.height ? (r.height - W) / 2 : Math.min(0, Math.max(r.height - W, M.y)); };
+  const apply = () => { clamp(); world.style.transform = `translate(${M.x}px,${M.y}px) scale(${M.k})`; world.style.setProperty('--k', M.k); drawPins(); scheduleView(); };
   const center = () => { const r = R(); M.k = cfg.zoom; M.x = r.width / 2 - cfg.me[0] * M.k; M.y = (r.height - PEEK) / 2 + 20 - cfg.me[1] * M.k; };
   const zoomAt = (cx, cy, nk) => { nk = Math.min(cfg.maxZoom, Math.max(cfg.minZoom, nk)); const f = nk / M.k; M.x = cx - (cx - M.x) * f; M.y = cy - (cy - M.y) * f; M.k = nk; apply(); };
   const anim = fn => { world.style.transition = 'transform .3s ease'; fn(); setTimeout(() => world.style.transition = '', 320); };
@@ -453,15 +528,15 @@ function initHome() {
 
 /* ───────── 회원가입 검증 (입력 중에는 부분 갱신) ───────── */
 function paintSignup() {
-  const g = S.signup, e = isEmail(g.email), p = isPw(g.pw), m = !!g.pw && g.pw === g.pw2, t = g.terms && g.priv, ok = e && p && m && t;
+  const g = S.signup, m = !!g.pw && g.pw === g.pw2;
+  const hint = (k, h) => { const n = $(`[data-hint=${k}]`); if (n) n.textContent = hintText(h); };
   const set = (k, v) => { const n = $(`[data-err=${k}]`); if (n) n.textContent = v ? '! ' + v : ''; };
-  set('email', g.email && !e ? '이메일 형식을 확인해 주세요.' : '');
-  set('pw', g.pw && !p ? '8자 이상, 영문과 숫자를 함께 입력해 주세요.' : '');
+  hint('nick', nickHint(g.nick)); hint('pw', pwHint(g.pw));
   set('pw2', g.pw2 && !m ? '비밀번호가 일치하지 않아요.' : '');
   set('fail', g.state === 'fail' ? '계정을 만들지 못했어요. 입력과 동의는 그대로 유지돼요. 다시 시도해 주세요.' : '');
   const b = $('#sbtn');
   b.textContent = { idle: '동의하고 계정 만들기', busy: '계정을 만드는 중…', fail: '다시 시도' }[g.state];
-  b.disabled = g.state === 'busy' || (g.state !== 'fail' && !ok);
+  b.disabled = g.state === 'busy' || (g.state !== 'fail' && !signupOk(g));
 }
 
 /* ───────── 액션 ───────── */
@@ -492,7 +567,10 @@ const ACT = {
     window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(p.address || p.name), '_blank', 'noopener');
     flash('길찾기를 새 탭에서 열었어요.');
   },
-  near(a) { S.nearCat = a; S.shown.home = 1; homeDraw(); },
+  hfopen() { S.popCat = S.nearCat; drawPop(); $('#pop').hidden = false; },
+  hfpick(a) { S.popCat = a; drawPop(); },
+  hfclose() { $('#pop').hidden = true; },
+  hfapply() { S.nearCat = S.popCat; S.shown.home = 1; $('#pop').hidden = true; homeDraw(); },
   zin: () => HOME.zin(), zout: () => HOME.zout(), zme: () => HOME.zme(),
   loc() {
     const a = prompt('현재 위치 지역(행정동)을 입력하세요', S.area);
@@ -513,7 +591,11 @@ const ACT = {
     flash(searchStores().length ? '조건을 적용했어요.' : '결과가 없어요. 조건을 줄여 보세요.');
   },
   pw() { S.login.show = !S.login.show; render(); },
-  chk(a) { S.signup[a] = !S.signup[a]; if (S.signup.state !== 'busy') S.signup.state = 'idle'; render(); },
+  chk(a) {
+    S.signup[a] = !S.signup[a]; if (S.signup.state !== 'busy') S.signup.state = 'idle';
+    const b = $(`[data-a="chk:${a}"] .ck`); if (b) b.textContent = S.signup[a] ? '✓' : '';
+    paintSignup();
+  },
   view() { flash('약관 내용은 목업에서 제공하지 않아요.'); },
   pcat(a) {
     const d = S.pdraft; d.cats = toggle(d.cats, a);
@@ -541,19 +623,19 @@ const FORM = {
   login() {
     const L = S.login; if (L.busy) return;
     L.err = {};
-    if (!S.loginEmail) L.err.email = '이메일을 입력해 주세요.'; else if (!isEmail(S.loginEmail)) L.err.email = '이메일 형식을 확인해 주세요.';
+    if (!S.loginNick.trim()) L.err.nick = '닉네임을 입력해 주세요.';
     if (!L.pw) L.err.pw = '비밀번호를 입력해 주세요.';
-    if (L.err.email || L.err.pw) return render();
+    if (L.err.nick || L.err.pw) return render();
     L.busy = true; render();
     setTimeout(() => { L.busy = false; L.pw = ''; S.user = true; nav('04'); flash('로그인했어요. 저장한 취향을 불러왔어요.'); }, 700);
   },
   signup() {
     const g = S.signup;
-    if (g.state === 'busy' || !(isEmail(g.email) && isPw(g.pw) && g.pw === g.pw2 && g.terms && g.priv)) return;
+    if (g.state === 'busy' || !signupOk(g)) return;
     g.state = 'busy'; paintSignup();
     setTimeout(() => {
-      if (g.email.startsWith('fail')) { g.state = 'fail'; paintSignup(); return; }      // 실패 시연: 이메일이 fail 로 시작
-      g.state = 'idle'; S.loginEmail = g.email; nav('02'); flash('계정을 만들었어요. 로그인해 주세요.');
+      if (g.nick.toLowerCase().startsWith('fail')) { g.state = 'fail'; paintSignup(); return; }      // 실패 시연: 닉네임이 fail 로 시작
+      g.state = 'idle'; S.loginNick = g.nick; nav('02'); flash('계정을 만들었어요. 로그인해 주세요.');
     }, 800);
   },
   search() {
