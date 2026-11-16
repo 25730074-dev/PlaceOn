@@ -8,8 +8,12 @@ https://apis.map.kakao.com/web/guide/
   ㄴ 사용자 현재 좌표 가져오기
 장소 데이터: 공공 데이터 (JSON)
   ㄴ 세부 취향 태그 관리?
+*데이터 관리 방향성 고민
 
-데이터 관리 방향성 고민
+[README.md]
+프로젝트 변경 이력
+기능우선순위, MVP, 사이트맵, Userflow, 데이터 정리(JSON, API 등), 생성형 AI 도구
+prd 깔끔하게 정리
 
 [컬러 팔레트]
 < 기본 UI >
