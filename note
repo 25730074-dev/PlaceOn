@@ -1,19 +1,26 @@
+[데이터 및 API 사용]
 kakao map api 가이드
 https://apis.map.kakao.com/web/guide/
-
-네이버 지도 데이터
-https://www.octoparse.kr/blog/get-store-data-from-naver-map
-
-네이버 지도 방문자 리뷰 스크래퍼
-https://www.octoparse.kr/template/naver-map-review-scraper
 
 지도 API: 카카오맵 JavaScript API
   ㄴ 지도 표시 기능 구현
 현재 위치: 브라우저 Geolocation API
   ㄴ 사용자 현재 좌표 가져오기
-장소 데이터: 카카오 로컬 API
-  ㄴ 장소명, 주소, 좌표, 카테고리 등의 데이터를 활용해 현재 위치 주변의 장소 정보를 검색
-JSON 데이터
+장소 데이터: 공공 데이터 (JSON)
   ㄴ 세부 취향 태그 관리?
 
 데이터 관리 방향성 고민
+
+[컬러 팔레트]
+< 기본 UI >
+메인 테마: #2B548A
+배경: #FAF9F6
+텍스트: #191F28
+구분선: #E5E8EB
+
+< 지도 >
+자연(녹): #D8E6D3
+자연(청): #CFE4F5
+건물: #EAE8E1
+도로: #FFFFFF
+지도 핀: #1A73E8
