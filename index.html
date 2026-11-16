@@ -22,6 +22,7 @@ hr{border:0;border-top:1px solid #000}
 #content{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
 #content.full{padding:0;overflow:hidden;position:relative}
 #content>*+*,.stk>*+*{margin-top:12px}
+#tabs[hidden]{display:none}
 #tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #000}
 #tabs button{border:0;border-left:1px solid #000;min-height:56px}
 #tabs button:first-child{border-left:0}
@@ -31,6 +32,7 @@ hr{border:0;border-top:1px solid #000}
 .b.p{border:3px double #000}
 .b.sm,.s{width:auto;display:inline-block;min-height:44px;padding:8px 14px}
 button:disabled{border-style:dashed;cursor:not-allowed}
+.b.off,.b.p.off{border-style:dashed}
 .c{min-height:44px;padding:8px 14px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .bt{display:flex;justify-content:space-between;align-items:center;gap:8px}
@@ -146,6 +148,7 @@ const pwHint = v => {
   return miss.length ? { ok: false, text: miss.join(', ') } : { ok: true, text: '사용 가능한 비밀번호예요' };
 };
 const hintText = h => (h.ok ? '✓ ' : '') + h.text;
+const signupMissing = g => [!nickHint(g.nick).ok && '닉네임', !pwHint(g.pw).ok && '비밀번호', !(g.pw && g.pw === g.pw2) && '비밀번호 확인', !(g.terms && g.priv) && '약관 동의'].filter(Boolean);
 const signupOk = g => nickHint(g.nick).ok && pwHint(g.pw).ok && !!g.pw && g.pw === g.pw2 && g.terms && g.priv;
 const toggle = (a, v) => a.includes(v) ? a.filter(x => x !== v) : [...a, v];
 const countBy = (arr, f) => { const m = new Map(); arr.forEach(x => m.set(f(x), (m.get(f(x)) || 0) + 1)); return m; };
@@ -181,9 +184,11 @@ function init() {
   S = {
     screen: '01', user: false, err: '', loginNick: '', popCat: '',
     area: d.area, search: { ...d.search }, applied: noFilter(), draft: null, nearCat: '',
-    prefs: structuredClone(d.prefs), pdraft: structuredClone(d.prefs), favCat: '',
-    saved: new Set([a.id, b.id, c.id]),
-    history: [{ id: a.id, at: now }, { id: e.id, at: now - 2 * 3600e3 }, { id: f.id, at: now - 24 * 3600e3 }],
+    prefs: { cats: [], types: [], extra: '' }, pdraft: { cats: [], types: [], extra: '' }, favCat: '',
+    saved: new Set(), history: [],                                   // 비로그인: 저장·기록·취향 없음
+    acct: { saved: new Set([a.id, b.id, c.id]), prefs: structuredClone(d.prefs),   // 데모 계정 데이터 (로그인하면 불러옴)
+            history: [{ id: a.id, at: now }, { id: e.id, at: now - 2 * 3600e3 }, { id: f.id, at: now - 24 * 3600e3 }] },
+    after: null, pending: null,
     shown: { home: 1, search: 1 },
     placeId: null, from: '04',
     login: { pw: '', show: false, busy: false, err: {} },
@@ -281,7 +286,7 @@ const BODY = {
       <div class="pw"><div class="field"><input data-in="login.pw" type="${L.show ? 'text' : 'password'}" placeholder="비밀번호 입력" value="${L.pw}"></div>
         <button type="button" data-a="pw">${L.show ? '숨김' : '표시'}</button></div>
       <p>${L.err.pw ? '! ' + L.err.pw : ''}</p>
-      <button type="submit" class="b p" ${L.busy ? 'disabled' : ''}>${L.busy ? '로그인 중…' : '로그인'}</button>
+      <button type="button" class="b p" data-a="submit:login" ${L.busy ? 'disabled' : ''}>${L.busy ? '로그인 중…' : '로그인'}</button>
       <div class="box">인증이 완료되면 계정에 연결된 취향, 즐겨찾기와 최근 조회 기록을 불러옵니다.</div>
       <hr><p>아직 계정이 없으신가요?</p>
       ${btn('회원가입으로 이동', 'go:03')}
@@ -298,7 +303,8 @@ const BODY = {
       <div class="bt"><button type="button" class="ckb" data-a="chk:terms"><span class="ck">${g.terms ? '✓' : ''}</span><span>[필수] 서비스 이용약관 동의</span></button><button type="button" class="b sm" data-a="view">보기</button></div>
       <div class="bt"><button type="button" class="ckb" data-a="chk:priv"><span class="ck">${g.priv ? '✓' : ''}</span><span>[필수] 개인정보 수집·이용 동의</span></button><button type="button" class="b sm" data-a="view">보기</button></div>
       <p data-err="fail"></p>
-      <button type="submit" class="b p" id="sbtn">동의하고 계정 만들기</button>
+      <p data-hint="need"></p>
+      <button type="button" class="b p" id="sbtn" data-a="submit:signup">동의하고 계정 만들기</button>
       <div class="box">가입 완료 시 계정을 생성하고 사용자 데이터를 저장합니다. 로그인 후 취향과 장소 기록이 이 계정에 연결됩니다.</div>
       ${btn('이미 계정이 있다면 로그인으로 이동 →', 'go:02', 'sm')}
     </form>`; },
@@ -309,7 +315,7 @@ const BODY = {
     <div class="ctrl"><button type="button" data-a="zin" aria-label="확대">+</button><button type="button" data-a="zout" aria-label="축소">−</button><button type="button" data-a="zme">내 위치</button></div>
     <section class="sheet">
       <div class="drag"><div class="grab"><i></i></div>
-        <div class="sheet-head"><p>내 취향 맞춤 추천 <span id="hcount"></span></p><p id="hprefs"></p></div></div>
+        <div class="sheet-head"><p>${S.user ? '내 취향 맞춤 추천' : '주변 추천'} <span id="hcount"></span></p><p id="hprefs"></p></div></div>
       <div class="sheet-list" id="hlist"></div>
     </section>
     <div class="pop" id="pop" hidden><div class="popbg" data-a="hfclose"></div>
@@ -469,7 +475,7 @@ function homeDraw() {                       // 칩·취향·추천 풀이 바뀔
   const { cats, types } = S.prefs;
   POOL = recommend().map(p => ({ p, pos: pinPos(p) }));
   $('#hfbtn').textContent = `필터 · ${S.nearCat || '전체'}`;
-  $('#hprefs').textContent = [...cats, ...types].join(' · ') || '저장한 취향이 없어요';
+  $('#hprefs').textContent = !S.user ? '로그인하면 취향 맞춤 추천을 받을 수 있어요' : [...cats, ...types].join(' · ') || '저장한 취향이 없어요';
   $('#pins').innerHTML = ''; drawPins();
   lastSig = ''; drawView(true);
 }
@@ -536,26 +542,44 @@ function paintSignup() {
   set('fail', g.state === 'fail' ? '계정을 만들지 못했어요. 입력과 동의는 그대로 유지돼요. 다시 시도해 주세요.' : '');
   const b = $('#sbtn');
   b.textContent = { idle: '동의하고 계정 만들기', busy: '계정을 만드는 중…', fail: '다시 시도' }[g.state];
-  b.disabled = g.state === 'busy' || (g.state !== 'fail' && !signupOk(g));
+  const miss = signupMissing(g);
+  $('[data-hint=need]').textContent = miss.length ? '남은 항목: ' + miss.join(' · ') : '✓ 모든 항목을 확인했어요';
+  b.disabled = g.state === 'busy'; b.classList.toggle('off', miss.length > 0 && g.state !== 'fail');
 }
 
 /* ───────── 액션 ───────── */
+const emptyPrefs = () => ({ cats: [], types: [], extra: '' });
+function loadAccount() {                    // 로그인: 계정의 저장·기록·취향을 불러옴
+  const a = S.acct;
+  S.saved = new Set(a.saved); S.history = a.history.map(h => ({ ...h })); S.prefs = structuredClone(a.prefs); S.pdraft = structuredClone(a.prefs);
+}
+function stashAccount() {                   // 로그아웃: 계정 데이터를 보관하고 화면에서는 모두 비움
+  S.acct = { saved: new Set(S.saved), history: S.history.map(h => ({ ...h })), prefs: structuredClone(S.prefs) };
+  S.saved = new Set(); S.history = []; S.prefs = emptyPrefs(); S.pdraft = emptyPrefs(); S.nearCat = ''; S.favCat = '';
+}
+function needLogin(pendingId) {             // 비로그인 상태에서 개인화 기능 → 로그인으로 이동, 끝나면 돌아옴
+  S.after = S.screen; S.pending = pendingId ?? null;
+  nav('02'); flash('로그인이 필요해요.');
+}
 const ACT = {
   go: a => nav(a),
-  back() { nav({ '02': '01', '03': '01', '06': '05', '07': S.from }[S.screen]); },
+  submit(a) { const f = $(`form[data-form="${a}"]`); if (f) syncForm(f); FORM[a]?.(); },
+  back() { if (S.screen === '02') { S.after = null; S.pending = null; } nav({ '02': '01', '03': '01', '06': '05', '07': S.from }[S.screen]); },
   tab(a) {
     if (a === 'home') return nav('04');
     if (a === 'search') return nav('05');
-    nav(S.user ? '08' : '02');
+    if (!S.user) { S.after = '08'; S.pending = null; return nav('02'); }
+    nav('08');
   },
   seg: a => nav(a),
   place(a) {
     S.placeId = +a; S.from = S.screen;
-    S.history = [{ id: +a, at: Date.now() }, ...S.history.filter(h => h.id !== +a)];
+    if (S.user) S.history = [{ id: +a, at: Date.now() }, ...S.history.filter(h => h.id !== +a)];   // 비로그인은 기록하지 않음
     nav('07');
   },
   save(a) {
     a = +a;
+    if (!S.user) return needLogin(a);
     const on = !S.saved.has(a);
     on ? S.saved.add(a) : S.saved.delete(a);
     flash(on ? '즐겨찾기에 저장했어요.' : '저장을 해제했어요.');
@@ -605,7 +629,7 @@ const ACT = {
   ptype(a) { S.pdraft.types = toggle(S.pdraft.types, a); render(); },
   psave() { S.prefs = structuredClone(S.pdraft); S.nearCat = ''; S.shown.home = 1; flash('취향을 저장했어요.'); render(); },
   favcat(a) { S.favCat = a; render(); },
-  logout() { S.user = false; flash('로그아웃했어요.'); nav('01'); }
+  logout() { stashAccount(); S.user = false; flash('로그아웃했어요.'); nav('01'); }
 };
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-a]'); if (!el) return;
@@ -614,9 +638,11 @@ document.addEventListener('click', e => {
 });
 
 /* ───────── 입력 · 폼 제출 ───────── */
+const setPath = (p, v) => { const k = p.split('.'); k.reduce((o, key, j) => j === k.length - 1 ? (o[key] = v) : o[key], S); };
+const syncForm = f => f.querySelectorAll('[data-in]').forEach(i => setPath(i.dataset.in, i.value));   // 자동완성처럼 input 이벤트 없이 채워진 값도 반영
 document.addEventListener('input', e => {
   const p = e.target.dataset.in; if (!p) return;
-  const k = p.split('.'); k.reduce((o, key, j) => j === k.length - 1 ? (o[key] = e.target.value) : o[key], S);
+  const k = p.split('.'); setPath(p, e.target.value);
   if (k[0] === 'signup') { if (S.signup.state !== 'busy') S.signup.state = 'idle'; paintSignup(); }
 });
 const FORM = {
@@ -627,15 +653,22 @@ const FORM = {
     if (!L.pw) L.err.pw = '비밀번호를 입력해 주세요.';
     if (L.err.nick || L.err.pw) return render();
     L.busy = true; render();
-    setTimeout(() => { L.busy = false; L.pw = ''; S.user = true; nav('04'); flash('로그인했어요. 저장한 취향을 불러왔어요.'); }, 700);
+    setTimeout(() => {
+      L.busy = false; L.pw = ''; S.user = true; loadAccount();
+      const to = S.after || '04', pend = S.pending; S.after = null; S.pending = null;
+      if (pend) S.saved.add(pend);
+      nav(to); flash(pend ? '로그인했어요. 즐겨찾기에 저장했어요.' : '로그인했어요. 저장한 취향을 불러왔어요.');
+    }, 700);
   },
   signup() {
     const g = S.signup;
-    if (g.state === 'busy' || !signupOk(g)) return;
+    if (g.state === 'busy') return;
+    const miss = signupMissing(g);
+    if (miss.length) { const n = $('[data-err=fail]'); if (n) n.textContent = '! 남은 항목: ' + miss.join(' · '); flash('남은 항목: ' + miss.join(' · ')); return; }
     g.state = 'busy'; paintSignup();
     setTimeout(() => {
       if (g.nick.toLowerCase().startsWith('fail')) { g.state = 'fail'; paintSignup(); return; }      // 실패 시연: 닉네임이 fail 로 시작
-      g.state = 'idle'; S.loginNick = g.nick; nav('02'); flash('계정을 만들었어요. 로그인해 주세요.');
+      g.state = 'idle'; S.loginNick = g.nick; S.acct = { saved: new Set(), history: [], prefs: emptyPrefs() }; nav('02'); flash('계정을 만들었어요. 로그인해 주세요.');
     }, 800);
   },
   search() {
@@ -643,7 +676,13 @@ const FORM = {
     S.err = ''; S.shown.search = 1; render();
   }
 };
-document.addEventListener('submit', e => { e.preventDefault(); FORM[e.target.dataset.form]?.(); });
+document.addEventListener('submit', e => e.preventDefault());          // 브라우저 기본 제출은 쓰지 않음
+document.addEventListener('keydown', e => {                             // Enter 로 제출 (한글 조합 중 Enter 는 무시)
+  if (e.key !== 'Enter' || e.isComposing || !e.target.matches || !e.target.matches('input')) return;
+  const f = e.target.closest('form[data-form]'); if (!f) return;
+  e.preventDefault(); syncForm(f); FORM[f.dataset.form]?.();
+});
+document.addEventListener('change', e => { const f = e.target.closest && e.target.closest('form[data-form]'); if (f) { syncForm(f); if (S.screen === '03') paintSignup(); } });
 
 init(); render(true);
 </script>
