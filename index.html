@@ -427,7 +427,7 @@ function render(top) {
     .map(([k, l]) => `<button type="button" class="${k === t ? 'on' : ''}" data-a="tab:${k}">${l}</button>`).join('');
   c.scrollTop = st;
   if (S.screen === '03') paintSignup();
-  if (S.screen === '04') initHome();
+  if (S.screen === '04') { initHome(); homeDraw(); }
 }
 function flash(t) {
   document.querySelectorAll('.msg').forEach(m => m.remove());
@@ -487,7 +487,7 @@ function scheduleView() {                   // 이동이 멈추면(0.2초) 시�
 }
 function drawView(force) {
   const lst = $('#hlist'); if (!lst) return;
-  const v = viewRect(0), items = POOL.filter(o => inView(o.pos, v)).map(o => o.p).sort((a, b) => scoreOf(b) - scoreOf(a) || a.id - b.id);
+  const v = KMAP && viewRect(0), noGeo = !POOL.some(o => o.pos), items = POOL.filter(o => !v || noGeo || inView(o.pos, v)).map(o => o.p).sort((a, b) => scoreOf(b) - scoreOf(a) || a.id - b.id);
   const sig = items.map(p => p.id).join(','), changed = sig !== lastSig; lastSig = sig;
   const stat = `보이는 영역 ${items.length}곳 불러옴`;
   if (!changed && !force) { $('#hstat').textContent = stat; return; }
@@ -501,7 +501,6 @@ function drawView(force) {
 }
 const drawPop = () => { $('#popchips').innerHTML = [['전체', ''], ...CATS.map(c => [c, c])].map(([l, v]) => chip(l, S.popCat === v, 'hfpick:' + v)).join(''); };
 function homeDraw() {                       // 칩·취향·추천 풀이 바뀔 때 (지도 위치는 유지)
-  if (!KMAP) return;
   const { cats, types } = S.prefs;
   POOL = recommend().map(p => ({ p, pos: pinPos(p) }));
   $('#hfbtn').textContent = `필터 · ${S.nearCat || '전체'}`;
