@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PlaceON 와이어프레임 (모바일)</title>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=5c9b1c2f8a7cbfc9d6e4d308c0e1a0da&libraries=services&autoload=false"></script>
 <style>
 /* 와이어프레임 (컬러 팔레트 적용) — 서체·아이콘은 아직 미적용 */
 :root{
@@ -82,14 +83,7 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 
 /* 홈: 전체 화면 지도 + 바텀시트 */
 .home{position:absolute;inset:0;overflow:hidden;--sh:120px}
-.homemap{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;background:var(--building);cursor:grab}
-#world{position:absolute;left:0;top:0;transform-origin:0 0}
-#world svg{display:block;pointer-events:none}
-.m-bld{fill:var(--building)}
-.m-road{stroke:var(--road);fill:none}
-.m-water{fill:var(--nature-blue)}
-.m-park{fill:var(--nature-green)}
-.m-label{fill:var(--text);opacity:.5}
+.homemap{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;background:var(--building);cursor:auto}
 .pin{position:absolute;z-index:3;transform:translate(-50%,-100%) scale(calc(1 / var(--k,1)));transform-origin:50% 100%;border:0;background:none;padding:0;min-height:0;display:flex;flex-direction:column;align-items:center;gap:2px}
 .pin svg{display:block}
 .pin small{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px}
@@ -100,6 +94,7 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 .pin small,.me small{font-size:12px;border:1px solid var(--line);background:var(--surface);padding:0 6px;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
 .me{position:absolute;z-index:2;width:18px;height:18px;border-radius:50%;background:var(--theme);border:3px solid var(--on-theme);box-shadow:0 0 0 8px var(--theme-a20);transform:translate(-50%,-50%) scale(calc(1 / var(--k,1)))}
 .me small{position:absolute;top:28px;left:50%;transform:translateX(-50%)}
+.pin,.me{position:relative;transform:none}   /* 카카오 오버레이가 위치를 잡음 */
 .maptop{position:absolute;top:10px;left:10px;right:10px;z-index:5;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .maptop>*{pointer-events:auto;align-self:flex-start}
 .pill{border:1px solid var(--line);background:var(--surface);padding:4px 12px}
@@ -133,7 +128,7 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 <!-- 앱 설정 (장소 데이터는 아래 stores 블록) -->
 <script type="application/json" id="data">
 {
-  "map": {"size": 2400, "me": [1200, 1200], "zoom": 1, "minZoom": 0.4, "maxZoom": 2.5},
+  "map": {"me": [37.5636, 126.9860], "level": 4},
   "pageSize": 20,
   "intro": [
     ["가까운 장소 추천", "현재 위치 주변의 장소를 살펴보세요."],
@@ -282,17 +277,6 @@ const BAR = {
 };
 
 /* ───────── 화면 본문 ───────── */
-const MS = D.map.size, GRID = Array.from({ length: Math.ceil(MS / 120) + 1 }, (_, i) => `M${i * 120} 0V${MS}M0 ${i * 120}H${MS}`).join('');
-const MAPSVG = `<svg width="${MS}" height="${MS}" viewBox="0 0 ${MS} ${MS}" aria-hidden="true">
-  <rect class="m-bld" width="${MS}" height="${MS}"/>
-  <path class="m-road" d="${GRID}" stroke-width="10"/>
-  <path class="m-water" d="M0 ${MS * .86}C${MS * .25} ${MS * .8} ${MS * .4} ${MS * .94} ${MS * .65} ${MS * .87}S${MS * .9} ${MS * .8} ${MS} ${MS * .84}V${MS}H0Z"/>
-  <rect class="m-park" x="${MS * .62}" y="${MS * .55}" width="420" height="300" rx="28"/>
-  <rect class="m-park" x="${MS * .1}" y="${MS * .12}" width="360" height="260" rx="28"/>
-  <rect class="m-park" x="${MS * .7}" y="${MS * .1}" width="300" height="220" rx="28"/>
-  <path class="m-road" d="M0 ${MS * .3}L${MS} ${MS * .55}M${MS * .2} 0L${MS * .7} ${MS}M0 ${MS * .62}H${MS}M${MS * .5} 0V${MS}M${MS * .85} 0L${MS * .3} ${MS}" stroke-width="22"/>
-  <text class="m-label" x="${MS * .62 + 24}" y="${MS * .55 + 44}">공원</text><text class="m-label" x="${MS * .1 + 24}" y="${MS * .12 + 44}">공원</text><text class="m-label" x="${MS * .7 + 24}" y="${MS * .1 + 44}">공원</text><text class="m-label" x="40" y="${MS - 40}">강</text></svg>`;
-
 const BODY = {
   '01': () => `
     <p>내 주변에서 찾는<br>나에게 맞는 장소</p>
@@ -337,8 +321,8 @@ const BODY = {
     </form>`; },
 
   '04': () => `<div class="home">
-    <div class="homemap"><div id="world" style="width:${MS}px;height:${MS}px">${MAPSVG}<div class="me" style="left:${D.map.me[0]}px;top:${D.map.me[1]}px"><small>내 위치</small></div><div id="pins"></div></div></div>
-    <div class="maptop"><span class="pill">현재 위치 ${S.area} 기준</span><button type="button" class="b sm" id="hfbtn" data-a="hfopen"></button><div class="dash" id="hstat">※ 좌표 데이터 없음 · 핀·거리는 임의 배치</div></div>
+    <div class="homemap"><div id="kmap" style="width:100%;height:100%"></div></div>
+    <div class="maptop"><span class="pill">현재 위치 ${S.area} 기준</span><button type="button" class="b sm" id="hfbtn" data-a="hfopen"></button><div class="dash" id="hstat"></div></div>
     <div class="ctrl"><button type="button" data-a="zin" aria-label="확대">+</button><button type="button" data-a="zout" aria-label="축소">−</button><button type="button" data-a="zme">내 위치</button></div>
     <section class="sheet">
       <div class="drag"><div class="grab"><i></i></div>
@@ -443,7 +427,7 @@ function render(top) {
     .map(([k, l]) => `<button type="button" class="${k === t ? 'on' : ''}" data-a="tab:${k}">${l}</button>`).join('');
   c.scrollTop = st;
   if (S.screen === '03') paintSignup();
-  if (S.screen === '04') { initHome(); homeDraw(); }
+  if (S.screen === '04') initHome();
 }
 function flash(t) {
   document.querySelectorAll('.msg').forEach(m => m.remove());
@@ -459,25 +443,43 @@ function nav(to) {
 }
 
 /* ───────── 홈: 지도(드래그·휠·핀치 줌) + 바텀시트 ───────── */
-const PEEK = 120, MAP = { x: null, y: null, k: null };
-let sheetIdx = 0, HOME = {}, POOL = [], lastSig = '', vtm = 0;
-const distText = p => { const [x, y] = pinPos(p), [cx, cy] = D.map.me, m = Math.round(Math.hypot(x - cx, y - cy) / 10) * 10;   // 지도 1px = 1m (임의 배치 좌표 기준)
+const PEEK = 120, MAP = { c: null, lv: null }, OV = new Map();
+let sheetIdx = 0, HOME = {}, POOL = [], lastSig = '', vtm = 0, KMAP = null, geoRun = false;
+const GEO = (() => { try { return JSON.parse(localStorage.getItem('geo') || '{}'); } catch { return {}; } })();   // { id: [lat, lng] | null } — 지오코딩 캐시
+const saveGeo = () => { try { localStorage.setItem('geo', JSON.stringify(GEO)); } catch {} };
+const pinPos = p => GEO[p.id] || null;
+const distText = p => { const q = pinPos(p); if (!q) return '정보 없음'; const [la, lo] = D.map.me, r = x => x * Math.PI / 180,
+  a = Math.sin(r(q[0] - la) / 2) ** 2 + Math.cos(r(la)) * Math.cos(r(q[0])) * Math.sin(r(q[1] - lo) / 2) ** 2,
+  m = Math.round(2 * 6371000 * Math.asin(Math.sqrt(a)) / 10) * 10;
   return m < 1000 ? `${m}m` : `${(m / 1000).toFixed(1)}km`; };
-const pinPos = p => {                       // 좌표 데이터가 없어 id 기반으로 내 위치 주변에 임의 배치
-  const [cx, cy] = D.map.me, r = Math.sqrt((Math.imul(p.id, 2654435761) >>> 0) / 4294967296) * 1100;
-  const a = (Math.imul(p.id + 7, 2246822519) >>> 0) / 4294967296 * 2 * Math.PI;
-  return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
-};
-const viewRect = (m = 0) => { const r = $('.homemap').getBoundingClientRect(), k = MAP.k; return [(-MAP.x - m) / k, (-MAP.y - m) / k, (r.width - MAP.x + m) / k, (r.height - MAP.y + m) / k]; };
-const inView = (pos, v) => pos[0] >= v[0] && pos[0] <= v[2] && pos[1] >= v[1] && pos[1] <= v[3];
+const viewRect = (m = 0) => { const b = KMAP.getBounds(), s = b.getSouthWest(), n = b.getNorthEast(),
+  py = (n.getLat() - s.getLat()) * (m ? .2 : 0), px = (n.getLng() - s.getLng()) * (m ? .2 : 0);
+  return [s.getLat() - py, s.getLng() - px, n.getLat() + py, n.getLng() + px]; };
+const inView = (pos, v) => pos && pos[0] >= v[0] && pos[0] <= v[2] && pos[1] >= v[1] && pos[1] <= v[3];
 
-function drawPins() {                       // 화면 안(+여유 200px)에 들어온 장소만 핀으로 로드, 벗어난 핀은 제거
-  const box = $('#pins'); if (!box) return;
-  const want = POOL.filter(o => inView(o.pos, viewRect(200))), ids = new Set(want.map(o => String(o.p.id)));
-  const have = new Set([...box.children].map(c => c.dataset.id));
-  [...box.children].forEach(c => { if (!ids.has(c.dataset.id)) c.remove(); });
-  want.forEach(({ p, pos }) => { if (!have.has(String(p.id))) box.insertAdjacentHTML('beforeend',
-    `<button type="button" class="pin" data-id="${p.id}" style="left:${pos[0]}px;top:${pos[1]}px" data-a="place:${p.id}" aria-label="${p.name}"><small>${p.name}</small><svg width="22" height="30" viewBox="0 0 24 32" aria-hidden="true"><path class="pin-fill" d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20C24 5.4 18.6 0 12 0z"/><circle class="pin-dot" cx="12" cy="12" r="4.5"/></svg></button>`); });
+const PIN = p => `<button type="button" class="pin" data-a="place:${p.id}" aria-label="${p.name}"><small>${p.name}</small><svg width="22" height="30" viewBox="0 0 24 32" aria-hidden="true"><path class="pin-fill" d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20C24 5.4 18.6 0 12 0z"/><circle class="pin-dot" cx="12" cy="12" r="4.5"/></svg></button>`;
+function clearPins() { OV.forEach(o => o.setMap(null)); OV.clear(); }
+function drawPins() {                       // 화면 안(+여유)에 들어온 장소만 오버레이로 표시
+  if (!KMAP) return;
+  const want = POOL.filter(o => inView(o.pos, viewRect(1))), ids = new Set(want.map(o => o.p.id));
+  OV.forEach((o, id) => { if (!ids.has(id)) { o.setMap(null); OV.delete(id); } });
+  want.forEach(({ p, pos }) => { if (!OV.has(p.id)) OV.set(p.id, new kakao.maps.CustomOverlay({
+    map: KMAP, position: new kakao.maps.LatLng(...pos), xAnchor: .5, yAnchor: 1, clickable: true, content: PIN(p) })); });
+}
+function geocodeAll() {                     // 주소 → 좌표 (최초 1회, 결과는 localStorage 캐시)
+  geoRun = true;
+  const gc = new kakao.maps.services.Geocoder(), todo = STORES.filter(s => !(s.id in GEO) && (s.address || s.jibun));
+  let i = 0;
+  const next = () => {
+    if (i >= todo.length) { saveGeo(); if ($('#kmap')) homeDraw(); return; }
+    const s = todo[i++], q = (s.address || s.jibun).replace(/\s*\(.*\)/, '').split(',')[0];
+    gc.addressSearch(q, (r, st) => {
+      GEO[s.id] = st === kakao.maps.services.Status.OK ? [+r[0].y, +r[0].x] : null;
+      if (i % 20 === 0) { saveGeo(); if ($('#kmap')) homeDraw(); }
+      setTimeout(next, 30);
+    });
+  };
+  next();
 }
 function scheduleView() {                   // 이동이 멈추면(0.2초) 시트 목록을 지도 영역 기준으로 다시 로드
   const st = $('#hstat'); if (st) st.textContent = '지도 영역 불러오는 중…';
@@ -487,7 +489,7 @@ function drawView(force) {
   const lst = $('#hlist'); if (!lst) return;
   const v = viewRect(0), items = POOL.filter(o => inView(o.pos, v)).map(o => o.p).sort((a, b) => scoreOf(b) - scoreOf(a) || a.id - b.id);
   const sig = items.map(p => p.id).join(','), changed = sig !== lastSig; lastSig = sig;
-  const stat = `보이는 영역 ${items.length}곳 불러옴 · 좌표 없음(핀·거리 임의 배치)`;
+  const stat = `보이는 영역 ${items.length}곳 불러옴`;
   if (!changed && !force) { $('#hstat').textContent = stat; return; }
   if (changed && !force) S.shown.home = 1;
   const st = lst.scrollTop;
@@ -499,43 +501,28 @@ function drawView(force) {
 }
 const drawPop = () => { $('#popchips').innerHTML = [['전체', ''], ...CATS.map(c => [c, c])].map(([l, v]) => chip(l, S.popCat === v, 'hfpick:' + v)).join(''); };
 function homeDraw() {                       // 칩·취향·추천 풀이 바뀔 때 (지도 위치는 유지)
+  if (!KMAP) return;
   const { cats, types } = S.prefs;
   POOL = recommend().map(p => ({ p, pos: pinPos(p) }));
   $('#hfbtn').textContent = `필터 · ${S.nearCat || '전체'}`;
   $('#hprefs').textContent = !S.user ? '로그인하면 취향 맞춤 추천을 받을 수 있어요' : [...cats, ...types].join(' · ') || '저장한 취향이 없어요';
-  $('#pins').innerHTML = ''; drawPins();
+  clearPins(); drawPins();
   lastSig = ''; drawView(true);
 }
 function initHome() {
-  const cfg = D.map, M = MAP, box = $('.homemap'), world = $('#world'), sheet = $('.sheet'), home = $('.home'), drag = $('.drag');
+  const box = $('.homemap'), sheet = $('.sheet'), home = $('.home'), drag = $('.drag');
   const R = () => box.getBoundingClientRect();
-  const clamp = () => { const r = R(), W = cfg.size * M.k;                 // 지도 가장자리 밖으로 나가지 않게
-    M.x = W <= r.width ? (r.width - W) / 2 : Math.min(0, Math.max(r.width - W, M.x));
-    M.y = W <= r.height ? (r.height - W) / 2 : Math.min(0, Math.max(r.height - W, M.y)); };
-  const apply = () => { clamp(); world.style.transform = `translate(${M.x}px,${M.y}px) scale(${M.k})`; world.style.setProperty('--k', M.k); drawPins(); scheduleView(); };
-  const center = () => { const r = R(); M.k = cfg.zoom; M.x = r.width / 2 - cfg.me[0] * M.k; M.y = (r.height - PEEK) / 2 + 20 - cfg.me[1] * M.k; };
-  const zoomAt = (cx, cy, nk) => { nk = Math.min(cfg.maxZoom, Math.max(cfg.minZoom, nk)); const f = nk / M.k; M.x = cx - (cx - M.x) * f; M.y = cy - (cy - M.y) * f; M.k = nk; apply(); };
-  const anim = fn => { world.style.transition = 'transform .3s ease'; fn(); setTimeout(() => world.style.transition = '', 320); };
-  const mid = () => [R().width / 2, (R().height - sheet.offsetHeight) / 2];
-  if (M.x === null) center();
-  apply();
-  HOME = { zin: () => anim(() => zoomAt(...mid(), M.k * 1.4)), zout: () => anim(() => zoomAt(...mid(), M.k / 1.4)), zme: () => anim(() => { center(); apply(); }) };
-
-  const pts = new Map(); let last = 0;
-  const dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]); };
-  box.addEventListener('pointerdown', e => {
-    if (e.target.closest('.pin')) return;
-    box.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
-    world.style.transition = ''; if (pts.size === 2) last = dist();
+  KMAP = null; OV.clear();
+  if (typeof kakao === 'undefined') $('#kmap').textContent = '카카오 지도 SDK를 불러오지 못했어요. 앱키·도메인 등록을 확인하세요.';
+  else kakao.maps.load(() => {
+    const me = new kakao.maps.LatLng(...D.map.me);
+    const map = new kakao.maps.Map($('#kmap'), { center: MAP.c || me, level: MAP.lv ?? D.map.level });
+    new kakao.maps.CustomOverlay({ map, position: me, content: '<div class="me"><small>내 위치</small></div>' });
+    kakao.maps.event.addListener(map, 'idle', () => { MAP.c = map.getCenter(); MAP.lv = map.getLevel(); drawPins(); scheduleView(); });
+    HOME = { zin: () => map.setLevel(map.getLevel() - 1, { animate: true }), zout: () => map.setLevel(map.getLevel() + 1, { animate: true }), zme: () => map.panTo(me) };
+    KMAP = map; homeDraw();
+    if (!geoRun) geocodeAll();
   });
-  box.addEventListener('pointermove', e => {
-    const p = pts.get(e.pointerId); if (!p) return;
-    const px = p[0], py = p[1]; p[0] = e.clientX; p[1] = e.clientY;
-    if (pts.size === 2) { const [a, b] = [...pts.values()], r = R(), d = dist(); zoomAt((a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top, M.k * d / last); last = d; }
-    else { M.x += p[0] - px; M.y += p[1] - py; apply(); }
-  });
-  ['pointerup', 'pointercancel'].forEach(t => box.addEventListener(t, e => pts.delete(e.pointerId)));
-  box.addEventListener('wheel', e => { e.preventDefault(); const r = R(); zoomAt(e.clientX - r.left, e.clientY - r.top, M.k * (e.deltaY < 0 ? 1.15 : 1 / 1.15)); }, { passive: false });
 
   const snaps = () => [PEEK, Math.round(R().height * .5), R().height - 60];
   const setH = (h, a) => {
