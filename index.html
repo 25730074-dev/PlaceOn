@@ -3,100 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PlaceON 로우파이 와이어프레임 (모바일)</title>
+<title>PlaceON 와이어프레임 (모바일)</title>
 <style>
-/* 로우파이: 흑백 · 단일 서체/크기/굵기 · 아이콘 없음 · 둥근 모서리/그림자 없음 */
-*{box-sizing:border-box;margin:0;padding:0;font:inherit;color:#000;border-radius:0}
-html{font:16px/1.5 sans-serif;-webkit-text-size-adjust:100%}
+/* 와이어프레임 (컬러 팔레트 적용) — 서체·아이콘은 아직 미적용 */
+:root{
+  /* 기본 UI */
+  --theme:#2B548A; --bg:#FAF9F6; --text:#191F28; --line:#E5E8EB;
+  --surface:#FFFFFF; --on-theme:#FFFFFF;
+  /* 지도 */
+  --nature-green:#D8E6D3; --nature-blue:#CFE4F5; --building:#EAE8E1; --road:#FFFFFF; --pin:#1A73E8;
+  /* 파생(텍스트색 투명도) */
+  --text-a25:rgba(25,31,40,.25); --theme-a20:rgba(43,84,138,.2);
+}
+*{box-sizing:border-box;margin:0;padding:0;font:inherit;color:inherit;border-radius:0}
+html{font:16px/1.5 sans-serif;color:var(--text);-webkit-text-size-adjust:100%}
 html,body{height:100%;overscroll-behavior:none}
-body{background:#fff;display:flex;justify-content:center;align-items:center;padding:24px 8px}
-button,input{background:#fff;border:1px solid #000;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{background:var(--bg);display:flex;justify-content:center}
+button,input{background:var(--surface);border:1px solid var(--line);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 input{cursor:text;padding:12px;width:100%;outline:none}
-input:focus{outline:2px solid #000;outline-offset:1px}
-hr{border:0;border-top:1px solid #000}
+input:focus{border-color:var(--theme);outline:1px solid var(--theme)}
+hr{border:0;border-top:1px solid var(--line)}
 
-.phone{width:100%;max-width:430px;height:min(calc(100vh - 48px),860px);height:min(calc(100dvh - 48px),860px);border:2px solid #000;display:flex;flex-direction:column;position:relative}
-#bar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid #000;min-height:56px}
+.phone{width:100%;max-width:430px;height:100vh;height:100dvh;display:flex;flex-direction:column;position:relative;background:var(--bg)}
+@media(min-width:431px){.phone{border-inline:1px solid var(--line)}}
+#bar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top));border-bottom:1px solid var(--line);min-height:56px;background:var(--surface)}
 #bar button{min-height:44px;padding:4px 14px}
 #bar .t{flex:1}
+#bar .logo{border:0;background:none;padding:0 4px;min-height:44px;color:var(--theme);font-size:20px;font-weight:700;letter-spacing:-.02em}
+#bar .auth{min-height:36px;padding:4px 14px}
+#bar .auth.on{border-color:var(--theme);color:var(--theme)}
 #content{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
 #content.full{padding:0;overflow:hidden;position:relative}
 #content>*+*,.stk>*+*{margin-top:12px}
 #tabs[hidden]{display:none}
-#tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #000}
-#tabs button{border:0;border-left:1px solid #000;min-height:56px}
+#tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--surface);padding-bottom:env(safe-area-inset-bottom)}
+#tabs button{border:0;border-left:1px solid var(--line);min-height:56px;background:transparent}
 #tabs button:first-child{border-left:0}
-#tabs button.on,.c.on,.sg button.on{background:#000;color:#fff}
+#tabs button.on{color:var(--theme);box-shadow:inset 0 3px 0 var(--theme)}
 
 .b{display:block;width:100%;min-height:44px;padding:11px;text-align:center}
-.b.p{border:3px double #000}
+.b.p{background:var(--theme);border-color:var(--theme);color:var(--on-theme)}
 .b.sm,.s{width:auto;display:inline-block;min-height:44px;padding:8px 14px}
 button:disabled{border-style:dashed;cursor:not-allowed}
-.b.off,.b.p.off{border-style:dashed}
+.b.p:disabled{opacity:.6}
+.b.off,.b.p.off{background:var(--surface);color:var(--theme);border:1px dashed var(--theme)}
 .c{min-height:44px;padding:8px 14px}
+.c.on,.sg button.on{background:var(--theme);border-color:var(--theme);color:var(--on-theme)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .bt{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .bt>button{flex:none;white-space:nowrap}
 .bt>span{min-width:0;overflow-wrap:anywhere;word-break:keep-all}
 .card .bt{align-items:flex-start}
-.box{border:1px solid #000;padding:12px}
-.dash{border:1px dashed #000;padding:12px}
-.card{display:flex;gap:12px;border:1px solid #000;padding:12px;cursor:pointer;position:relative;background:#fff}
+.box{border:1px solid var(--line);padding:12px;background:var(--surface)}
+.box.sel{border-color:var(--theme);box-shadow:inset 0 0 0 1px var(--theme)}
+.dash{border:1px dashed var(--theme);padding:12px;background:var(--surface)}
+.card{display:flex;gap:12px;border:1px solid var(--line);padding:12px;cursor:pointer;position:relative;background:var(--surface)}
 .card .img{width:80px;height:80px;flex:none}
 .card .bd{flex:1;min-width:0;overflow-wrap:anywhere;word-break:keep-all}
-.img{border:1px solid #000;display:grid;place-items:center;
-  background:linear-gradient(to top right,transparent calc(50% - .5px),#000 calc(50% - .5px),#000 calc(50% + .5px),transparent calc(50% + .5px)),
-             linear-gradient(to top left,transparent calc(50% - .5px),#000 calc(50% - .5px),#000 calc(50% + .5px),transparent calc(50% + .5px))}
-.img span{background:#fff;padding:0 6px;text-align:center}
+.img{border:1px solid var(--line);display:grid;place-items:center;background-color:var(--building);
+  background-image:linear-gradient(to top right,transparent calc(50% - .5px),var(--text-a25) calc(50% - .5px),var(--text-a25) calc(50% + .5px),transparent calc(50% + .5px)),
+                   linear-gradient(to top left,transparent calc(50% - .5px),var(--text-a25) calc(50% - .5px),var(--text-a25) calc(50% + .5px),transparent calc(50% + .5px))}
+.img span{background:var(--building);padding:0 6px;text-align:center}
 .img.h{height:150px}.img.m{height:130px}
-.sg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #000}
-.sg button{border:0;border-left:1px solid #000;min-height:44px}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--theme)}
+.sg button{border:0;border-left:1px solid var(--line);min-height:44px}
 .sg button:first-child{border-left:0}
 .user{display:flex;gap:12px;align-items:center}
 .user .img{width:44px;height:44px;flex:none}
 .user .g{flex:1}
 .pw{display:flex;gap:8px}
-.ck{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid #000;flex:none;line-height:1}
-.ck.sm{width:18px;height:18px;font-size:12px}
-.ckb{border:0;display:flex;align-items:center;gap:10px;text-align:left;min-height:44px;padding:0}
+.pw .field{flex:1}
+.ck{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid var(--theme);background:var(--surface);color:var(--theme);flex:none;line-height:1}
+.ckb{border:0;background:transparent;display:flex;align-items:center;gap:10px;text-align:left;min-height:44px;padding:0}
 .bt>.ckb{flex:1;white-space:normal}
-.rule{display:flex;gap:8px;align-items:center}
-[data-rules]>*+*{margin-top:4px}
 .kv{display:grid;grid-template-columns:64px 1fr;gap:12px 20px}
 .kv>span{min-width:0;overflow-wrap:anywhere;word-break:keep-all}
-.pw .field{flex:1}
-.msg{position:absolute;left:16px;right:16px;bottom:72px;border:2px solid #000;background:#fff;padding:8px 12px;z-index:9}
+.msg{position:absolute;left:16px;right:16px;bottom:72px;border:0;background:var(--theme);color:var(--on-theme);padding:8px 12px;z-index:9}
 
 /* 홈: 전체 화면 지도 + 바텀시트 */
 .home{position:absolute;inset:0;overflow:hidden;--sh:120px}
-.homemap{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;background:#fff;cursor:grab}
+.homemap{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;background:var(--building);cursor:grab}
 #world{position:absolute;left:0;top:0;transform-origin:0 0}
 #world svg{display:block;pointer-events:none}
+.m-bld{fill:var(--building)}
+.m-road{stroke:var(--road);fill:none}
+.m-water{fill:var(--nature-blue)}
+.m-park{fill:var(--nature-green)}
+.m-label{fill:var(--text);opacity:.5}
 .pin{position:absolute;z-index:3;transform:translate(-50%,-100%) scale(calc(1 / var(--k,1)));transform-origin:50% 100%;border:0;background:none;padding:0;min-height:0;display:flex;flex-direction:column;align-items:center;gap:2px}
-.pin i{display:block;width:14px;height:14px;background:#000}
-.pin small,.me small{font-size:12px;border:1px solid #000;background:#fff;padding:0 6px;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
-.me{position:absolute;z-index:2;width:18px;height:18px;border-radius:50%;background:#000;border:3px solid #fff;box-shadow:0 0 0 2px #000;transform:translate(-50%,-50%) scale(calc(1 / var(--k,1)))}
+.pin svg{display:block}
+.pin small{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px}
+.pin:hover small,.pin:focus-visible small{display:block}
+.pin:hover,.pin:focus-visible{z-index:4}
+.pin-fill{fill:var(--pin)}
+.pin-dot{fill:var(--on-theme)}
+.pin small,.me small{font-size:12px;border:1px solid var(--line);background:var(--surface);padding:0 6px;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+.me{position:absolute;z-index:2;width:18px;height:18px;border-radius:50%;background:var(--theme);border:3px solid var(--on-theme);box-shadow:0 0 0 8px var(--theme-a20);transform:translate(-50%,-50%) scale(calc(1 / var(--k,1)))}
 .me small{position:absolute;top:28px;left:50%;transform:translateX(-50%)}
 .maptop{position:absolute;top:10px;left:10px;right:10px;z-index:5;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .maptop>*{pointer-events:auto;align-self:flex-start}
-.pill{border:1px solid #000;background:#fff;padding:4px 12px}
-.maptop .dash{background:#fff;padding:2px 8px;font-size:12px}
-.ctrl{position:absolute;right:10px;bottom:calc(var(--sh) + 12px);z-index:5;display:flex;flex-direction:column;gap:6px}
-.ctrl{align-items:flex-end}
+.pill{border:1px solid var(--line);background:var(--surface);padding:4px 12px}
+.maptop .dash{background:var(--surface);padding:2px 8px;font-size:12px}
+.ctrl{position:absolute;right:10px;bottom:calc(var(--sh) + 12px);z-index:5;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
 .ctrl button{min-width:44px;min-height:44px;padding:0 10px}
 .home.max .ctrl{display:none}
 .pop{position:absolute;inset:0;z-index:12;display:flex;align-items:center;justify-content:center;padding:24px}
 .pop[hidden]{display:none}
-.popbg{position:absolute;inset:0}
-.popbox{position:relative;width:100%;max-height:80%;overflow:auto;background:#fff;border:2px solid #000;padding:16px}
+.popbg{position:absolute;inset:0;background:var(--text-a25)}
+.popbox{position:relative;width:100%;max-height:80%;overflow:auto;background:var(--surface);border:1px solid var(--line);padding:16px}
 .popbox>*+*{margin-top:12px}
-.sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;height:120px;background:#fff;border-top:2px solid #000;display:flex;flex-direction:column}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;height:120px;background:var(--surface);border-top:1px solid var(--line);display:flex;flex-direction:column}
 .drag{touch-action:none;cursor:grab;flex:none}
 .grab{padding:10px 0;display:grid;place-items:center}
-.grab i{display:block;width:40px;height:4px;background:#000}
+.grab i{display:block;width:40px;height:4px;background:var(--text-a25)}
 .sheet-head{padding:0 16px 10px}
 .sheet-list{flex:1;overflow-y:auto;padding:4px 16px 16px}
 .sheet-list>*+*{margin-top:12px}
+
 </style>
 </head>
 <body>
@@ -242,29 +265,33 @@ const userBlock = seg => `
     `<button type="button" class="${seg === k ? 'on' : ''}" data-a="seg:${k}">${l}</button>`).join('')}</div>`;
 
 /* ───────── 앱바 ───────── */
+const logo = `<button type="button" class="logo" data-a="go:04" aria-label="홈으로">PlaceON</button>`;
+const auth = () => S.user
+  ? `<button type="button" class="auth" data-a="logout">로그아웃</button>`
+  : `<button type="button" class="auth on" data-a="login">로그인</button>`;
+const mainBar = () => `${logo}<span class="t"></span>${auth()}`;           // 로고 + 로그인/로그아웃 (로그인 상태에 따라 변경)
 const back = `<button type="button" data-a="back">뒤로</button>`;
 const BAR = {
-  '01': () => `<span>PlaceON</span><span class="t"></span><button type="button" data-a="go:04">닫기</button>`,
-  '02': () => `<span class="t">로그인</span><button type="button" data-a="back" aria-label="닫기">X</button>`,
-  '03': () => `${back}<span class="t">회원가입</span>`,
-  '04': () => `<span>PlaceON</span><span class="t"></span><button type="button" data-a="go:01">서비스 소개</button><button type="button" data-a="loc">위치 변경</button>`,
-  '05': () => `<span>장소 검색</span>`,
+  '01': () => `${logo}<span class="t"></span><button type="button" class="auth" data-a="go:04">닫기</button>`,    // 소개 화면: 로그인 대신 닫기
+  '02': () => `${logo}<span class="t"></span><button type="button" data-a="back" aria-label="닫기">X</button>`,
+  '03': () => `${logo}<span class="t"></span>${back}`,
+  '04': mainBar, '05': mainBar,
   '06': () => `${back}<span class="t">검색 조건 설정</span><button type="button" data-a="freset">초기화</button>`,
   '07': () => `${back}<span class="t">장소 상세</span>`,
-  '08': () => `<span>마이페이지</span>`, '09': () => `<span>마이페이지</span>`, '10': () => `<span>마이페이지</span>`
+  '08': mainBar, '09': mainBar, '10': mainBar
 };
 
 /* ───────── 화면 본문 ───────── */
-const MS = D.map.size, MAPSVG = `<svg width="${MS}" height="${MS}" viewBox="0 0 ${MS} ${MS}" aria-hidden="true">
-  <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#000"/></pattern>
-    <pattern id="grid" width="120" height="120" patternUnits="userSpaceOnUse"><path d="M0 0H120M0 0V120" stroke="#000" stroke-dasharray="2 8" fill="none"/></pattern></defs>
-  <rect width="${MS}" height="${MS}" fill="#fff"/><rect width="${MS}" height="${MS}" fill="url(#grid)"/>
-  <path d="M0 ${MS * .86}C${MS * .25} ${MS * .8} ${MS * .4} ${MS * .94} ${MS * .65} ${MS * .87}S${MS * .9} ${MS * .8} ${MS} ${MS * .84}V${MS}H0Z" fill="url(#hatch)" stroke="#000"/>
-  <rect x="${MS * .62}" y="${MS * .55}" width="420" height="300" fill="none" stroke="#000" stroke-dasharray="8 6"/>
-  <rect x="${MS * .1}" y="${MS * .12}" width="360" height="260" fill="none" stroke="#000" stroke-dasharray="8 6"/>
-  <rect x="${MS * .7}" y="${MS * .1}" width="300" height="220" fill="none" stroke="#000" stroke-dasharray="8 6"/>
-  <path d="M0 ${MS * .3}L${MS} ${MS * .55}M${MS * .2} 0L${MS * .7} ${MS}M0 ${MS * .62}H${MS}M${MS * .5} 0V${MS}M${MS * .85} 0L${MS * .3} ${MS}" stroke="#000" stroke-width="2" fill="none"/>
-  <text x="${MS * .62 + 20}" y="${MS * .55 + 40}">공원 영역</text><text x="${MS * .1 + 20}" y="${MS * .12 + 40}">공원 영역</text><text x="${MS * .7 + 20}" y="${MS * .1 + 40}">공원 영역</text><text x="40" y="${MS - 40}">강</text></svg>`;
+const MS = D.map.size, GRID = Array.from({ length: Math.ceil(MS / 120) + 1 }, (_, i) => `M${i * 120} 0V${MS}M0 ${i * 120}H${MS}`).join('');
+const MAPSVG = `<svg width="${MS}" height="${MS}" viewBox="0 0 ${MS} ${MS}" aria-hidden="true">
+  <rect class="m-bld" width="${MS}" height="${MS}"/>
+  <path class="m-road" d="${GRID}" stroke-width="10"/>
+  <path class="m-water" d="M0 ${MS * .86}C${MS * .25} ${MS * .8} ${MS * .4} ${MS * .94} ${MS * .65} ${MS * .87}S${MS * .9} ${MS * .8} ${MS} ${MS * .84}V${MS}H0Z"/>
+  <rect class="m-park" x="${MS * .62}" y="${MS * .55}" width="420" height="300" rx="28"/>
+  <rect class="m-park" x="${MS * .1}" y="${MS * .12}" width="360" height="260" rx="28"/>
+  <rect class="m-park" x="${MS * .7}" y="${MS * .1}" width="300" height="220" rx="28"/>
+  <path class="m-road" d="M0 ${MS * .3}L${MS} ${MS * .55}M${MS * .2} 0L${MS * .7} ${MS}M0 ${MS * .62}H${MS}M${MS * .5} 0V${MS}M${MS * .85} 0L${MS * .3} ${MS}" stroke-width="22"/>
+  <text class="m-label" x="${MS * .62 + 24}" y="${MS * .55 + 44}">공원</text><text class="m-label" x="${MS * .1 + 24}" y="${MS * .12 + 44}">공원</text><text class="m-label" x="${MS * .7 + 24}" y="${MS * .1 + 44}">공원</text><text class="m-label" x="40" y="${MS - 40}">강</text></svg>`;
 
 const BODY = {
   '01': () => `
@@ -340,8 +367,8 @@ const BODY = {
     const d = S.draft, q = S.search.query, types = TYPES[d.category] || [];
     return `
     <p>추천 기준</p>
-    <div class="box" style="${d.mode === 'keyword' ? 'border-width:3px' : ''}" data-a="fmode:keyword"><p>${d.mode === 'keyword' ? '(●)' : '( )'} 키워드 · ${q}</p><p>업소명·카테고리·업태 기준으로 추천</p></div>
-    <div class="box" style="${d.mode === 'area' ? 'border-width:3px' : ''}" data-a="fmode:area"><p>${d.mode === 'area' ? '(●)' : '( )'} 지명·장소명 · ${S.area}</p><p>입력한 지역 또는 장소의 지역 기준으로 추천</p></div>
+    <div class="box ${d.mode === 'keyword' ? 'sel' : ''}" data-a="fmode:keyword"><p>${d.mode === 'keyword' ? '(●)' : '( )'} 키워드 · ${q}</p><p>업소명·카테고리·업태 기준으로 추천</p></div>
+    <div class="box ${d.mode === 'area' ? 'sel' : ''}" data-a="fmode:area"><p>${d.mode === 'area' ? '(●)' : '( )'} 지명·장소명 · ${S.area}</p><p>입력한 지역 또는 장소의 지역 기준으로 추천</p></div>
     <hr>
     <p>지역 (행정동)</p>
     <div class="row">${[['전체', ''], ...TOP_AREAS.map(a => [a, a]), ['그 외', '__other']].map(([l, v]) => chip(l, d.area === v, 'farea:' + v)).join('')}</div>
@@ -450,7 +477,7 @@ function drawPins() {                       // 화면 안(+여유 200px)에 들�
   const have = new Set([...box.children].map(c => c.dataset.id));
   [...box.children].forEach(c => { if (!ids.has(c.dataset.id)) c.remove(); });
   want.forEach(({ p, pos }) => { if (!have.has(String(p.id))) box.insertAdjacentHTML('beforeend',
-    `<button type="button" class="pin" data-id="${p.id}" style="left:${pos[0]}px;top:${pos[1]}px" data-a="place:${p.id}" aria-label="${p.name}"><small>${p.name}</small><i></i></button>`); });
+    `<button type="button" class="pin" data-id="${p.id}" style="left:${pos[0]}px;top:${pos[1]}px" data-a="place:${p.id}" aria-label="${p.name}"><small>${p.name}</small><svg width="22" height="30" viewBox="0 0 24 32" aria-hidden="true"><path class="pin-fill" d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20C24 5.4 18.6 0 12 0z"/><circle class="pin-dot" cx="12" cy="12" r="4.5"/></svg></button>`); });
 }
 function scheduleView() {                   // 이동이 멈추면(0.2초) 시트 목록을 지도 영역 기준으로 다시 로드
   const st = $('#hstat'); if (st) st.textContent = '지도 영역 불러오는 중…';
@@ -596,10 +623,7 @@ const ACT = {
   hfclose() { $('#pop').hidden = true; },
   hfapply() { S.nearCat = S.popCat; S.shown.home = 1; $('#pop').hidden = true; homeDraw(); },
   zin: () => HOME.zin(), zout: () => HOME.zout(), zme: () => HOME.zme(),
-  loc() {
-    const a = prompt('현재 위치 지역(행정동)을 입력하세요', S.area);
-    if (a && a.trim()) { S.area = a.trim(); S.shown.home = 1; render(); }
-  },
+  login() { S.after = S.screen === '01' ? '04' : S.screen; S.pending = null; nav('02'); },
   mode(a) { S.search.mode = a; S.shown.search = 1; render(); },
   clearq() { S.search.query = ''; S.err = ''; render(); },
   filter() { S.draft = { ...structuredClone(S.applied), mode: S.search.mode }; nav('06'); },
@@ -629,7 +653,10 @@ const ACT = {
   ptype(a) { S.pdraft.types = toggle(S.pdraft.types, a); render(); },
   psave() { S.prefs = structuredClone(S.pdraft); S.nearCat = ''; S.shown.home = 1; flash('취향을 저장했어요.'); render(); },
   favcat(a) { S.favCat = a; render(); },
-  logout() { stashAccount(); S.user = false; flash('로그아웃했어요.'); nav('01'); }
+  logout() {
+    if (S.screen === '08' && dirty() && !confirm('저장하지 않은 수정 내용이 있어요. 이동할까요?')) return;
+    stashAccount(); S.user = false; flash('로그아웃했어요.'); nav('01');
+  }
 };
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-a]'); if (!el) return;
