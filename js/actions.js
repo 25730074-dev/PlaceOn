@@ -53,11 +53,6 @@ const ACT = {
     S.screen === '04' ? homeDraw() : render();
   },
   more(a) { S.shown[a]++; a === 'home' ? homeDraw() : render(); },
-  route() {
-    const p = place(S.placeId);
-    window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(p.address || p.name), '_blank', 'noopener');
-    flash('길찾기를 새 탭에서 열었어요.');
-  },
   hfopen() { S.popCat = S.nearCat; drawPop(); $('#pop').hidden = false; },
   hfpick(a) { S.popCat = a; drawPop(); },
   hfclose() { $('#pop').hidden = true; },
