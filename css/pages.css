@@ -35,3 +35,6 @@
 .sheet-head{padding:0 16px 10px}
 .sheet-list{flex:1;overflow-y:auto;padding:4px 16px 16px}
 .sheet-list>*+*{margin-top:12px}
+
+/* 상세: 장소 위치 지도 */
+.detailmap{height:200px;border-radius:var(--r);overflow:hidden;background:var(--building);display:grid;place-items:center;font-size:13px;color:var(--text-a60);text-align:center;padding:0}
