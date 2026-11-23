@@ -94,8 +94,7 @@ const BODY = {
     <div class="row">${[p.area, ...p.floors].filter(Boolean).map(t => `<span class="box" style="padding:3px 10px">${t}</span>`).join('')}</div>
     <hr>
     <p class="lbl">장소 정보</p><div class="kv"><span>도로명</span><span>${p.address || none}</span><span>지번</span><span>${p.jibun || none}</span><span>지역</span><span>${p.area || none}</span><span>위치</span><span>${floorText(p)}</span></div>
-    ${img('장소 위치 지도 영역', 'm')}
-    ${btn('길찾기', 'route', 'p')}
+    <div class="detailmap" id="dmap" role="img" aria-label="장소 위치 지도">지도를 불러오는 중…</div>
     ${btn(saved ? '✓ 즐겨찾기 저장됨 · 해제' : '즐겨찾기에 저장', 'save:' + p.id)}`; },
 
   '08': () => {
