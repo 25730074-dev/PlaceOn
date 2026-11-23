@@ -115,3 +115,29 @@ function initHome() {
   };
   drag.addEventListener('pointerup', end); drag.addEventListener('pointercancel', end);
 }
+
+/* ───────── 상세: 장소 위치 지도 (마커 1개) ───────── */
+function geocodeOne(p, done) {              // 도로명 → 실패 시 지번으로 재시도, 결과는 GEO 캐시에 저장
+  const gc = new kakao.maps.services.Geocoder(), OK = kakao.maps.services.Status.OK,
+    qs = [p.address.replace(/\s*\(.*\)/, '').split(',')[0], p.jibun.replace(/번지.*$/, '')].filter(Boolean);
+  const go = i => i >= qs.length ? done(null) : gc.addressSearch(qs[i], (r, st) => st === OK ? done([+r[0].y, +r[0].x]) : go(i + 1));
+  go(0);
+}
+function initDetailMap() {
+  const el = $('#dmap'), p = place(S.placeId);
+  if (!el) return;
+  if (typeof kakao === 'undefined') { el.textContent = '지도를 불러오지 못했어요. 앱키·도메인 등록을 확인하세요.'; return; }
+  kakao.maps.load(() => {
+    const show = pos => {
+      if (!$('#dmap')) return;              // 그 사이 다른 화면으로 이동했으면 중단
+      if (!pos) { el.textContent = '이 장소의 위치를 찾지 못했어요.'; return; }
+      el.textContent = '';
+      const c = new kakao.maps.LatLng(...pos), map = new kakao.maps.Map(el, { center: c, level: 3 });
+      new kakao.maps.Marker({ map, position: c });
+      map.setZoomable(false);               // 페이지 스크롤과 휠 줌이 겹치지 않도록 + / − 버튼 사용
+      map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
+    };
+    const pos = pinPos(p);
+    pos ? show(pos) : geocodeOne(p, r => { GEO[p.id] = r; saveGeo(); show(r); });
+  });
+}
