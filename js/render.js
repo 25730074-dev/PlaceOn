@@ -19,6 +19,7 @@ function render(top) {
   c.scrollTop = st;
   if (S.screen === '03') paintSignup();
   if (S.screen === '04') { initHome(); homeDraw(); }
+  if (S.screen === '07') initDetailMap();
 }
 function flash(t) {
   document.querySelectorAll('.msg').forEach(m => m.remove());
