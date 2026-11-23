@@ -1,35 +1,32 @@
-/* 디자인 토큰 · 리셋 · 폰 프레임 · 앱바 · 탭바 */
+/* css/base.css — 토큰 · 리셋 · 타이포 */
+/* 와이어프레임 (컬러 팔레트 적용) — 서체·아이콘은 아직 미적용 */
 :root{
-  --bg:#e9edf1; --surface:#fff; --soft:#f3f5f7; --line:#d5dae1;
-  --ink:#1c2330; --sub:#5d6675; --accent:#0f6b66; --accent-soft:#dcefed; --danger:#b3372b;
-  --r-sm:8px; --r-md:12px;
-  --font:'Pretendard','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  /* 기본 UI */
+  --theme:#2B548A; --bg:#FAF9F6; --text:#191F28; --line:#E5E8EB;
+  --surface:#FFFFFF; --on-theme:#FFFFFF;
+  /* 지도 */
+  --nature-green:#D8E6D3; --nature-blue:#CFE4F5; --building:#EAE8E1; --road:#FFFFFF; --pin:#2B548A;
+  /* 파생(텍스트색 투명도) */
+  --text-a25:rgba(25,31,40,.25); --theme-a20:rgba(43,84,138,.2);
+  --text-a60:rgba(25,31,40,.6); --theme-soft:#E8EEF6; --danger:#D64545;
+  /* 반경·그림자 */
+  --r:14px; --r-sm:10px; --r-pill:999px;
+  --sh1:0 1px 3px rgba(25,31,40,.08),0 1px 2px rgba(25,31,40,.04); --sh2:0 6px 20px rgba(25,31,40,.14);
 }
-*{box-sizing:border-box;margin:0}
-html,body{height:100%}
-body{font-family:var(--font);color:var(--ink);background:var(--bg);display:flex;justify-content:center;align-items:center;font-size:15px;line-height:1.5}
-button,input{font:inherit;color:inherit}
-button{cursor:pointer}
+*{box-sizing:border-box;margin:0;padding:0;font:inherit;color:inherit}
+html{font:16px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",Pretendard,"Noto Sans KR","Malgun Gothic",system-ui,sans-serif;color:var(--text);-webkit-text-size-adjust:100%}
+html,body{height:100%;overscroll-behavior:none}
+body{background:var(--bg);display:flex;justify-content:center}
+button,input{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;transition:background .15s,transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+input{cursor:text;padding:12px;width:100%;outline:none}
+input:focus{border-color:var(--theme);outline:0;box-shadow:0 0 0 3px var(--theme-a20)}
+button:active:not(:disabled){transform:scale(.97)}
 hr{border:0;border-top:1px solid var(--line)}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-
-.phone{width:390px;height:min(820px,100vh);background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 12px 40px rgba(28,35,48,.14)}
-@media(max-width:430px){.phone{width:100vw;height:100vh;border:0}}
-.status{display:flex;justify-content:space-between;padding:10px 24px 4px;font-weight:700;font-size:13px}
-
-.appbar{display:flex;align-items:center;gap:10px;padding:10px 20px 12px;border-bottom:1px solid var(--line);min-height:52px}
-.appbar h1{font-size:18px;flex:1}
-.appbar .brand{font-size:20px;font-weight:800;letter-spacing:-.02em}
-.appbar .brand i{font-style:normal;color:var(--accent)}
-.appbar .link{text-decoration:none;color:var(--sub);font-size:14px}
-.appbar .back{font-size:20px;color:var(--ink)}
-.appbar .close{font-size:22px}
-.grow{flex:1}
-
-#content{flex:1;overflow-y:auto;padding:20px}
-#content.full{padding:0;overflow:hidden;position:relative}
-
-.tabbar{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
-.tabbar button{border:0;background:none;padding:10px 0 12px;font-size:12px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px}
-.tabbar button.on{background:var(--soft);color:var(--ink);font-weight:700}
-.home-bar{height:5px;width:130px;background:var(--ink);border-radius:3px;margin:6px auto 8px;flex:none}
+/* 타이포 위계 */
+.h1{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1.3}
+.h2{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.lbl{font-size:14px;font-weight:700}
+.sub{font-size:14px;color:var(--text-a60)}
+.nm{font-weight:700;font-size:16px}
+.err{font-size:13px;color:var(--danger)}
+.badge{display:inline-block;padding:1px 10px;border-radius:var(--r-pill);background:var(--theme-soft);color:var(--theme);font-size:12px;font-weight:700}
