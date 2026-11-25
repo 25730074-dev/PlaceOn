@@ -12,7 +12,7 @@ const PHOTOS = {                              // 카테고리 → [폴더, 파�
 const photoOf = p => { const e = PHOTOS[p.category]; if (!e) return '';
   return `${IMG_BASE}${e[0]}/${e[1][Math.floor(((p.id * 2654435761) >>> 0) / 4294967296 * e[1].length)]}.png`; };
 const thumb = (p, cls = '') => { const src = photoOf(p);   // 이미지가 없거나 불러오지 못하면 아래 흑백 플레이스홀더가 그대로 보임
-  return `<div class="thumb ${cls}" aria-hidden="true"><span>${cls === 'h' ? '장소 이미지' : '이미지'}</span>${src ? `<img src="${src}" alt="" loading="lazy" onerror="this.remove()">` : ''}</div>`; };
+  return `<div class="thumb ${cls}" aria-hidden="true"><span>${cls === 'h' ? '장소 이미지' : '이미지'}</span>${src ? `<img src="${src}" alt="" loading="lazy" onload="this.style.opacity=1" onerror="this.remove()">` : ''}</div>`; };
 const img = (t, cls = '') => `<div class="img ${cls}"><span>${t}</span></div>`;
 const fmtTime = t => new Date(t).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
 const dayDiff = t => { const a = new Date(t), b = new Date(); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); return Math.round((b - a) / 864e5); };
@@ -30,13 +30,14 @@ function pcard(p, { mode = 'list', time = '' } = {}) {
   return `<div class="card" data-a="place:${p.id}">${thumb(p)}<div class="bd">
     ${time ? `<div class="sub">${time}</div>` : ''}<div class="bt"><span class="nm">${p.name}</span>${top}</div>
     <div class="row meta"><span class="badge">${p.category}</span><span class="sub">${p.type || '업태 정보 없음'}</span></div>
-    <div class="sub">내 위치에서 ${distText(p)} · ${p.area || '지역 정보 없음'} · ${floorText(p)}</div>${foot}</div></div>`;
+    <div class="sub">내 위치에서 ${distText(p)} · ${p.area || '지역 정보 없음'} · ${floorText(p)}</div>${cardNote(p)}${foot}</div></div>`;
 }
 
+const GEAR = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
 const userBlock = seg => `
-  <div class="bt"><div class="user">${img('')}<div class="g"><p class="h2">${S.loginNick || '사용자'}님</p></div></div>
-    <button type="button" class="b sm" data-a="logout">로그아웃</button></div>
-  <div class="sg">${[['08', '취향 설정'], ['09', '즐겨찾기'], ['10', '최근 본 장소']].map(([k, l]) =>
+  <div class="bt"><div class="user">${img('')}<div class="g"><p class="h2">${esc(S.loginNick || '사용자')}님</p></div></div>
+    <button type="button" class="b sm" data-a="go:11">${GEAR}설정</button></div>
+  <div class="sg">${[['09', '즐겨찾기'], ['10', '최근 본 장소']].map(([k, l]) =>
     `<button type="button" class="${seg === k ? 'on' : ''}" data-a="seg:${k}">${l}</button>`).join('')}</div>`;
 
 /* ───────── 앱바 ───────── */
@@ -53,5 +54,5 @@ const BAR = {
   '04': mainBar, '05': mainBar,
   '06': () => `${back}<span class="t">검색 조건 설정</span><button type="button" data-a="freset">초기화</button>`,
   '07': () => `${back}<span class="t">장소 상세</span>`,
-  '08': mainBar, '09': mainBar, '10': mainBar
+  '09': mainBar, '10': mainBar
 };
