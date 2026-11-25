@@ -33,7 +33,8 @@ const STORES = window.APP_STORES.map(r => ({
   area: r['행정동명'] || '',
   category: r['카테고리'] || '미분류',
   type: r['업태명'] || '',
-  floors: FLOOR[r['업소위치']] || []
+  floors: FLOOR[r['업소위치']] || [],
+  ...(t => ({ tags: t['태그'] || {}, price: t['가격대'] || 0, peak: t['혼잡 시간'] || '' }))(window.APP_TAGS[r['업소명']] || {})   // data/place_tags.json (샘플 태그)
 }));
 const BY = Object.fromEntries(STORES.map(s => [s.id, s]));
 const place = id => BY[id];
@@ -48,36 +49,34 @@ const pageOf = n => n * D.pageSize;
 let S;
 
 function init() {
-  const d = D.defaults, now = Date.now();
-  const pick = (cat, type) => STORES.find(s => s.area === d.area && s.category === cat && (!type || s.type === type)) || STORES.find(s => s.category === cat);
-  const a = pick('카페/디저트', '카페/음료'), b = pick('음식점', '한식'), c = pick('카페/디저트', '베이커리'), e = pick('음식점', '양식'), f = pick('문화/여가');
+  const d = D.defaults;
   S = {
-    screen: '01', user: false, err: '', loginNick: '', popCat: '',
+    screen: '01', user: false, userKey: '', err: '', loginNick: '', popCat: '',
     area: d.area, search: { ...d.search }, applied: noFilter(), draft: null, nearCat: '',
-    prefs: { cats: [], types: [], extra: '' }, pdraft: { cats: [], types: [], extra: '' }, favCat: '',
-    saved: new Set(), history: [],                                   // 비로그인: 저장·기록·취향 없음
-    acct: { saved: new Set([a.id, b.id, c.id]), prefs: structuredClone(d.prefs),   // 데모 계정 데이터 (로그인하면 불러옴)
-            history: [{ id: a.id, at: now }, { id: e.id, at: now - 2 * 3600e3 }, { id: f.id, at: now - 24 * 3600e3 }] },
+    prefs: emptyPrefs(), pdraft: emptyPrefs(), settings: defaultSettings(), favCat: '',
+    saved: new Set(), history: [],                                   // 비로그인: 저장·기록·취향 없음 (로그인하면 store.js 가 계정 데이터를 불러옴)
     after: null, pending: null,
     shown: { home: 1, search: 1 },
-    placeId: null, from: '04',
+    placeId: null, from: '04', termsFrom: '03',
     login: { pw: '', show: false, busy: false, err: {} },
-    signup: { nick: '', pw: '', pw2: '', terms: false, priv: false, state: 'idle' }
+    signup: { nick: '', pw: '', pw2: '', terms: false, priv: false, state: 'idle', msg: '' },
+    uinfo: newUinfo(), del: newDel()
   };
 }
 
-/* ───────── 추천·검색 로직 ───────── */
-const scoreOf = p => (S.prefs.cats.includes(p.category) ? 2 : 0) + (S.prefs.types.includes(p.type) ? 1 : 0);
-function recommend() {                     // 홈: 내 위치 기준 가까운 순 NEAR_N곳 (필터 선택 시 해당 카테고리 안에서)
+/* ───────── 추천·검색 로직 (취향 점수·추천 설명은 reco.js) ───────── */
+function recommend() {                     // 홈: 내 위치 기준 가까운 순 NEAR_N곳 (필터 선택 시 해당 카테고리 안에서, 로그인하면 검색 반경 안에서)
+  const R = S.user ? S.prefs.radius : 0;
   return STORES.filter(p => pinPos(p) && (!S.nearCat || p.category === S.nearCat))
-    .map(p => ({ p, d: dist(ME, pinPos(p)) })).sort((a, b) => a.d - b.d || a.p.id - b.p.id).slice(0, NEAR_N).map(o => o.p);
+    .map(p => ({ p, d: dist(ME, pinPos(p)) })).filter(o => !R || o.d <= R).sort((a, b) => a.d - b.d || a.p.id - b.p.id).slice(0, NEAR_N).map(o => o.p);
 }
 function searchStores() {                  // 검색: 키워드(업소명·카테고리·업태) / 지명·장소명(행정동·주소·업소명) + 적용 필터
   const q = S.search.query.trim(), f = S.applied;
   if (!q) return [];
-  return STORES.filter(p => {
+  const res = STORES.filter(p => {
     const hit = S.search.mode === 'keyword' ? [p.name, p.category, p.type].some(x => x.includes(q)) : [p.area, p.address, p.jibun, p.name].some(x => x.includes(q));
     const ar = !f.area || (f.area === '__other' ? !TOP_AREAS.includes(p.area) : p.area === f.area);
     return hit && ar && (!f.category || p.category === f.category) && (!f.types.length || f.types.includes(p.type)) && (!f.floors.length || f.floors.some(x => p.floors.includes(x)));
   });
+  return personal() ? res.map(p => [p, scoreOf(p)]).sort((a, b) => b[1] - a[1]).map(o => o[0]) : res;     // 취향 일치 점수 높은 순 (동점은 기존 순서)
 }
