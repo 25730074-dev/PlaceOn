@@ -27,7 +27,7 @@ function drawPins() {                       // 화면 안(+여유)에 들어온 
     map: KMAP, position: new kakao.maps.LatLng(...pos), xAnchor: .5, yAnchor: 1, clickable: true, content: PIN(p) })); });
 }
 function watchMe() {                       // 실제 위치 추적 (HTTPS/localhost + 위치 권한 필요)
-  if (geoWatch !== null || !navigator.geolocation) return;
+  if (geoWatch !== null || !navigator.geolocation || (S.user && !S.settings.consent.location)) return;   // 위치 정보 이용 동의 필요
   let first = true;
   geoWatch = navigator.geolocation.watchPosition(pos => {
     ME = [pos.coords.latitude, pos.coords.longitude];
@@ -65,7 +65,7 @@ function drawView(force) {
   const st = lst.scrollTop;
   $('#hcount').textContent = `${S.nearCat || '전체'} · 가까운 순 ${items.length}곳`;
   lst.innerHTML = items.length ? items.slice(0, pageOf(S.shown.home)).map(p => pcard(p)).join('') + moreBtn('home', items.length)
-    : empty('가까운 장소를 찾지 못했어요', '주소 좌표를 불러오는 중이거나 이 카테고리에 장소가 없어요.');
+    : empty('가까운 장소를 찾지 못했어요', S.user ? `주소 좌표를 불러오는 중이거나 검색 반경(${radiusText(S.prefs.radius)}) 안에 장소가 없어요. 설정에서 반경을 넓혀 보세요.` : '주소 좌표를 불러오는 중이거나 이 카테고리에 장소가 없어요.');
   lst.scrollTop = changed && !force ? 0 : st;
   $('#hstat').textContent = stat;
 }
@@ -74,7 +74,7 @@ function homeDraw() {                       // 칩·취향·추천 풀이 바뀔
   ranked = ME.slice();
   POOL = recommend().map(p => ({ p, pos: pinPos(p) }));
   $('#hfbtn').textContent = `필터 · ${S.nearCat || '전체'}`;
-  $('#hprefs').textContent = '내 위치에서 가까운 순서로 보여드려요';
+  $('#hprefs').textContent = S.user ? `검색 반경 ${radiusText(S.prefs.radius)} · 가까운 순` : '내 위치에서 가까운 순서로 보여드려요';
   clearPins(); drawPins();
   lastSig = ''; drawView(true);
 }
