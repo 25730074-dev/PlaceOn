@@ -94,22 +94,10 @@ const BODY = {
     <div class="row">${[p.area, ...p.floors].filter(Boolean).map(t => `<span class="box" style="padding:3px 10px">${t}</span>`).join('')}</div>
     <hr>
     <p class="lbl">장소 정보</p><div class="kv"><span>도로명</span><span>${p.address || none}</span><span>지번</span><span>${p.jibun || none}</span><span>지역</span><span>${p.area || none}</span><span>위치</span><span>${floorText(p)}</span></div>
+    ${tagsHtml(p)}
     <div class="detailmap" id="dmap" role="img" aria-label="장소 위치 지도">지도를 불러오는 중…</div>
+    ${explainHtml(p)}
     ${btn(saved ? '✓ 즐겨찾기 저장됨 · 해제' : '즐겨찾기에 저장', 'save:' + p.id)}`; },
-
-  '08': () => {
-    const d = S.pdraft, types = d.cats.flatMap(c => TYPES[c] || []);
-    return `${userBlock('08')}
-    <p class="h1">나의 취향 설정</p><p class="sub">저장된 취향을 불러왔어요. 선택하거나 수정해 주세요.</p>
-    <p class="lbl">선호 카테고리 · 복수 선택</p>
-    <div class="row">${CATS.map(c => chip(c, d.cats.includes(c), 'pcat:' + c)).join('')}</div>
-    <p class="lbl">세부 업종 · 복수 선택</p>
-    ${types.length ? `<div class="row">${types.map(t => chip(t, d.types.includes(t), 'ptype:' + t)).join('')}</div>` : empty('선호 카테고리를 선택하면', '세부 업종을 고를 수 있어요.')}
-    <p class="lbl">추가 선호 조건</p>
-    <div><input data-in="pdraft.extra" placeholder="예: 창가 좌석이 있는 곳" value="${d.extra}"></div>
-    <p>${dirty() ? '※ 저장하지 않은 수정이 있어요' : ''}</p>
-    ${btn('수정한 취향 저장', 'psave', 'p')}
-    <div class="box">저장한 취향은 내 계정에 연결되며, 주변 장소 추천 시 기본 조건으로 사용됩니다.</div>`; },
 
   '09': () => {
     const all = [...S.saved].map(place), cats = [...new Set(all.map(p => p.category))];
