@@ -30,7 +30,7 @@ button:disabled{border-style:dashed;cursor:not-allowed}
 .thumb.h{height:150px;border-radius:var(--r)}
 .card .bd{flex:1;min-width:0;overflow-wrap:anywhere;word-break:keep-all}
 .img{display:grid;place-items:center;border-radius:var(--r);background:linear-gradient(135deg,var(--theme-soft),var(--nature-blue));color:var(--text-a60);font-size:13px}
-.img.h{height:150px}.img.m{height:130px}
+.img.h{height:150px}
 .sg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--theme);border-radius:var(--r);overflow:hidden}
 .sg button{border-radius:0}
 .sg button{border:0;border-left:1px solid var(--line);min-height:44px}

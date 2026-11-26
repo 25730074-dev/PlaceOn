@@ -5,7 +5,7 @@
   --theme:#2B548A; --bg:#FAF9F6; --text:#191F28; --line:#E5E8EB;
   --surface:#FFFFFF; --on-theme:#FFFFFF;
   /* 지도 */
-  --nature-green:#D8E6D3; --nature-blue:#CFE4F5; --building:#EAE8E1; --road:#FFFFFF; --pin:#2B548A;
+  --nature-blue:#CFE4F5; --building:#EAE8E1; --pin:#2B548A;
   /* 파생(텍스트색 투명도) */
   --text-a25:rgba(25,31,40,.25); --theme-a20:rgba(43,84,138,.2);
   --text-a60:rgba(25,31,40,.6); --theme-soft:#E8EEF6; --danger:#D64545;
