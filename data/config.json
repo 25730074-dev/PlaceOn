@@ -1,4 +1,8 @@
 {
+  "supabase": {
+    "url": "https://fiyargyzzdtnhgolirzy.supabase.co",
+    "anonKey": "sb_publishable_Xz_WOUDhauxeK_KNw8aGow_v7pja71C"
+  },
   "map": {
     "me": [
       37.5636,
@@ -118,6 +122,19 @@
     5000,
     10000
   ],
+  "reco": {
+    "weights": [
+      { "minSaved": 0, "taste": 0.55, "dist": 0.45, "behav": 0 },
+      { "minSaved": 3, "taste": 0.45, "dist": 0.35, "behav": 0.2 },
+      { "minSaved": 10, "taste": 0.35, "dist": 0.3, "behav": 0.35 }
+    ],
+    "taste": { "cat": 0.4, "tags": 0.4, "price": 0.2 },
+    "behavior": { "saved": 1, "viewed": 0.3, "halfLifeDays": 7 },
+    "riskEach": 0.05,
+    "riskMax": 0.2,
+    "savedPenalty": 0.1,
+    "diversity": { "window": 2, "penalty": 0.15 }
+  },
   "themes": [
     [
       "블루",
