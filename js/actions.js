@@ -43,12 +43,12 @@ const ACT = {
     flash(on ? '즐겨찾기에 저장했어요.' : '저장을 해제했어요.');
     S.screen === '04' ? homeDraw() : render();
   },
-  more(a) { S.shown[a]++; a === 'home' ? homeDraw() : render(); },
+  more(a) { S.shown[a]++; render(); },
   hfopen() { S.popCat = S.nearCat; drawPop(); $('#pop').hidden = false; },
   hfpick(a) { S.popCat = a; drawPop(); },
   hfclose() { $('#pop').hidden = true; },
-  hfapply() { S.nearCat = S.popCat; S.shown.home = 1; $('#pop').hidden = true; homeDraw(); },
-  zin: () => HOME.zin(), zout: () => HOME.zout(), zme: () => HOME.zme(),
+  hfapply() { S.nearCat = S.popCat; $('#pop').hidden = true; homeDraw(); $('#hlist').scrollTop = 0; },
+  zin: () => HOME.zin?.(), zout: () => HOME.zout?.(), zme: () => HOME.zme?.(),        // 지도가 아직 없으면 무시
   login() { S.after = S.screen === '01' ? '04' : S.screen; S.pending = null; nav('02'); },
   mode(a) { S.search.mode = a; S.shown.search = 1; render(); },
   clearq() { S.search.query = ''; S.err = ''; render(); },
@@ -72,9 +72,9 @@ const ACT = {
   },
   view() { S.termsFrom = S.screen; nav('14'); },
   favcat(a) { S.favCat = a; render(); },
-  logout() {
+  async logout() {
     if (S.screen === '08' && dirty() && !confirm('저장하지 않은 수정 내용이 있어요. 이동할까요?')) return;
-    signOut(); flash('로그아웃했어요.'); nav('01');
+    await signOut(); flash('로그아웃했어요.'); nav('01');       // 서버 모드: 남은 변경을 저장한 뒤 로그아웃
   }
 };
 document.addEventListener('click', e => {

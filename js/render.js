@@ -14,7 +14,8 @@ function render(top) {
   $('#bar').innerHTML = BAR[S.screen]();
   c.className = S.screen === '04' ? 'full' : '';
   c.innerHTML = BODY[S.screen]();
-  const t = TAB[S.screen], tabs = $('#tabs');
+  const t = S.screen === '07' ? TAB[S.from] || 'search'                    // 상세: 들어온 화면의 탭을 표시 (홈에서 왔으면 홈)
+    : S.screen === '14' && !S.user ? null : TAB[S.screen], tabs = $('#tabs');   // 가입 중 약관 보기: 탭 바 숨김
   tabs.hidden = !t;
   tabs.innerHTML = [['home', '홈'], ['search', '검색'], ['mypage', '마이페이지']]
     .map(([k, l]) => `<button type="button" class="${k === t ? 'on' : ''}" data-a="tab:${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${TAB_ICON[k]}</svg><span>${l}</span></button>`).join('');

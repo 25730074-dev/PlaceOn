@@ -15,10 +15,11 @@ const FORM = {
     if (!L.pw) L.err.pw = '비밀번호를 입력해 주세요.';
     if (L.err.nick || L.err.pw) return render();
     L.busy = true; render();
-    const key = await verifyLogin(S.loginNick, L.pw);
+    let acct = null, failed = false;
+    try { acct = await DB.login(S.loginNick, L.pw); } catch { failed = true; }   // 서버 모드에서 네트워크 오류
     L.busy = false; L.pw = '';
-    if (!key) { L.err.pw = '닉네임 또는 비밀번호가 올바르지 않아요.'; return render(); }
-    loginAs(key);
+    if (!acct) { L.err.pw = failed ? '서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.' : '닉네임 또는 비밀번호가 올바르지 않아요.'; return render(); }
+    loginAs(acct);
     const to = S.after || '04', pend = S.pending; S.after = null; S.pending = null;
     if (pend) S.saved.add(pend);
     nav(to); flash(pend ? '로그인했어요. 즐겨찾기에 저장했어요.' : '로그인했어요. 저장한 취향을 불러왔어요.');
@@ -29,11 +30,19 @@ const FORM = {
     const miss = signupMissing(g);
     if (miss.length) { const n = $('[data-err=fail]'); if (n) n.textContent = '! 남은 항목: ' + miss.join(' · '); flash('남은 항목: ' + miss.join(' · ')); return; }
     g.state = 'busy'; g.msg = ''; paintSignup();
-    if (g.nick.toLowerCase().startsWith('fail')) { await wait(800); g.state = 'fail'; paintSignup(); return; }      // 실패 시연: 닉네임이 fail 로 시작
-    const key = await createAccount(g.nick, g.pw);
-    if (!key) { g.state = 'fail'; g.msg = '이미 사용 중인 닉네임이에요. 다른 닉네임으로 시도해 주세요.'; paintSignup(); return; }
+    let r; try { r = await DB.signup(g.nick, g.pw); } catch (e) { r = { err: 'server', msg: e.message }; }
+    if (r.err) {
+      g.state = 'fail';
+      g.msg = { dup: '이미 사용 중인 닉네임이에요. 다른 닉네임으로 시도해 주세요.',
+        storage: '브라우저 저장소에 저장하지 못했어요. 시크릿 모드나 저장 공간을 확인해 주세요.',
+        confirm: '서버 설정에서 이메일 확인(Confirm email)을 꺼야 가입할 수 있어요. (supabase/README.md 참고)',
+        provider: '서버 설정에서 Email 로그인 방식(Enable Email provider)을 켜야 가입할 수 있어요. (supabase/README.md 참고)' }[r.err]
+        || `서버에 계정을 만들지 못했어요. 잠시 후 다시 시도해 주세요.${r.msg ? ` (${r.msg})` : ''}`;
+      paintSignup(); return;
+    }
     Object.assign(S.signup, { nick: '', pw: '', pw2: '', terms: false, priv: false, state: 'idle', msg: '' });
-    loginAs(key); nav('17'); flash('계정을 만들었어요. 취향 설문을 시작해요.');           // 가입 직후 자동 로그인 → 취향 설문
+    S.after = null; S.pending = null;                                              // 가입으로 왔으면 로그인 대기 상태는 버림
+    loginAs(r.acct); nav('17'); flash('계정을 만들었어요. 취향 설문을 시작해요.');           // 가입 직후 자동 로그인 → 취향 설문
   },
   search() {
     if (!S.search.query.trim()) { S.err = '검색어를 입력해 주세요.'; return render(); }
@@ -48,8 +57,11 @@ document.addEventListener('keydown', e => {                             // Enter
 });
 document.addEventListener('change', e => { const f = e.target.closest && e.target.closest('form[data-form]'); if (f) { syncForm(f); if (S.screen === '03') paintSignup(); } });
 
-(async () => {                              // 시연 계정 준비 → 같은 탭에서 로그인 중이었다면 복원 → 첫 렌더
-  init(); await seedDemo(); applyTheme(0);
-  const k = SES.get(); if (k && accounts()[k]) { loginAs(k); S.screen = '04'; }
+(async () => {                              // (LOCAL) 시연 계정 준비 → 같은 탭에서 로그인 중이었다면 복원 → 첫 렌더
+  init(); applyTheme(0);
+  $('#content').textContent = '불러오는 중…';
+  let acct = null;
+  try { await DB.seed(); acct = await DB.restore(); } catch {}            // 서버에 연결하지 못해도 비로그인 상태로 시작
+  if (acct) { loginAs(acct); S.screen = '04'; }
   render(true);
 })();

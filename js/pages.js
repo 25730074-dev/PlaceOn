@@ -14,10 +14,10 @@ const BODY = {
   '02': () => { const L = S.login; return `
     <form class="stk" data-form="login" novalidate>
       <p class="h1">다시 만나 반가워요</p><p class="sub">로그인하고 저장한 취향과 장소를 이어서 확인하세요.</p>
-      <p class="lbl">닉네임</p><div><input data-in="loginNick" placeholder="닉네임 입력" autocomplete="off" value="${S.loginNick}"></div>
+      <p class="lbl">닉네임</p><div><input data-in="loginNick" placeholder="닉네임 입력" autocomplete="off" value="${esc(S.loginNick)}"></div>
       <p class="err">${L.err.nick ? '! ' + L.err.nick : ''}</p>
       <p class="lbl">비밀번호</p>
-      <div class="pw"><input data-in="login.pw" type="${L.show ? 'text' : 'password'}" placeholder="비밀번호 입력" value="${L.pw}">
+      <div class="pw"><input data-in="login.pw" type="${L.show ? 'text' : 'password'}" placeholder="비밀번호 입력" value="${esc(L.pw)}">
         <button type="button" class="eye" data-a="pw" aria-label="${L.show ? '비밀번호 숨기기' : '비밀번호 표시'}"><svg viewBox="0 0 24 24" aria-hidden="true">${L.show ? EYE.off : EYE.on}</svg></button></div>
       <p class="err">${L.err.pw ? '! ' + L.err.pw : ''}</p>
       <button type="button" class="b p" data-a="submit:login" ${L.busy ? 'disabled' : ''}>${L.busy ? '로그인 중…' : '로그인'}</button>
@@ -29,23 +29,24 @@ const BODY = {
   '03': () => { const g = S.signup; return `
     <form class="stk" data-form="signup" novalidate>
       <p class="h1">나만의 장소 찾기 시작</p><p class="sub">닉네임과 비밀번호로 계정을 만드세요.</p>
-      <p class="lbl">닉네임</p><div><input data-in="signup.nick" placeholder="닉네임 입력" autocomplete="off" value="${g.nick}"></div>
+      <p class="lbl">닉네임</p><div><input data-in="signup.nick" placeholder="닉네임 입력" autocomplete="off" value="${esc(g.nick)}"></div>
       <p class="sub" data-hint="nick">${hintText(nickHint(g.nick))}</p>
-      <p class="lbl">비밀번호</p><div><input data-in="signup.pw" type="password" placeholder="비밀번호 입력" value="${g.pw}"></div>
+      <p class="lbl">비밀번호</p><div><input data-in="signup.pw" type="password" placeholder="비밀번호 입력" value="${esc(g.pw)}"></div>
       <p class="sub" data-hint="pw">${hintText(pwHint(g.pw))}</p>
-      <p class="lbl">비밀번호 확인</p><div><input data-in="signup.pw2" type="password" placeholder="비밀번호 다시 입력" value="${g.pw2}"></div><p class="err" data-err="pw2"></p>
+      <p class="lbl">비밀번호 확인</p><div><input data-in="signup.pw2" type="password" placeholder="비밀번호 다시 입력" value="${esc(g.pw2)}"></div><p class="err" data-err="pw2"></p>
       <div class="bt"><button type="button" class="ckb" data-a="chk:terms"><span class="ck">${g.terms ? '✓' : ''}</span><span>[필수] 서비스 이용약관 동의</span></button><button type="button" class="b sm" data-a="view">보기</button></div>
       <div class="bt"><button type="button" class="ckb" data-a="chk:priv"><span class="ck">${g.priv ? '✓' : ''}</span><span>[필수] 개인정보 수집·이용 동의</span></button><button type="button" class="b sm" data-a="view">보기</button></div>
       <p class="err" data-err="fail"></p>
       <p class="sub" data-hint="need"></p>
       <button type="button" class="b p" id="sbtn" data-a="submit:signup">동의하고 계정 만들기</button>
-      <div class="box">가입 완료 시 계정을 생성하고 사용자 데이터를 저장합니다. 로그인 후 취향과 장소 기록이 이 계정에 연결됩니다.</div>
+      <div class="box">가입 완료 시 계정을 생성하고 사용자 데이터를 ${DB.remote ? '서버에' : '이 브라우저에'} 저장합니다. 로그인 후 취향과 장소 기록이 이 계정에 연결됩니다.</div>
+      ${DB.remote || window.crypto?.subtle ? '' : '<p class="err">! 지금 주소(https·localhost 아님)에서는 비밀번호가 약한 방식으로 저장돼요. localhost 또는 https 주소로 열어 주세요.</p>'}
       ${btn('이미 계정이 있다면 로그인으로 이동 →', 'go:02', 'sm')}
     </form>`; },
 
   '04': () => `<div class="home">
     <div class="homemap"><div id="kmap" style="width:100%;height:100%"></div></div>
-    <div class="maptop"><span class="pill">현재 위치 ${S.area} 기준</span><button type="button" class="b sm" id="hfbtn" data-a="hfopen"></button><div class="dash" id="hstat"></div></div>
+    <div class="maptop"><span class="pill" id="hloc">${locText()}</span><button type="button" class="b sm" id="hfbtn" data-a="hfopen"></button><div class="dash" id="hstat"></div></div>
     <div class="ctrl"><button type="button" data-a="zin" aria-label="확대">+</button><button type="button" data-a="zout" aria-label="축소">−</button><button type="button" data-a="zme" aria-label="내 위치"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button></div>
     <section class="sheet">
       <div class="drag"><div class="grab"><i></i></div>
@@ -57,7 +58,7 @@ const BODY = {
         <div class="bt"><button type="button" class="b sm" data-a="hfclose">닫기</button><button type="button" class="b p sm" data-a="hfapply">적용</button></div></div></div></div>`,
 
   '05': () => {
-    const { query, mode } = S.search, area = mode === 'area', res = searchStores();
+    const { mode } = S.search, query = esc(S.search.query), area = mode === 'area', res = searchStores();     // query 는 화면 표시용(esc 적용)
     return `
     <form data-form="search"><div class="bt"><div style="flex:1"><input data-in="search.query" placeholder="키워드, 지명 또는 장소명" value="${query}"></div>
       <button type="button" data-a="clearq">지우기</button></div></form>
@@ -71,7 +72,7 @@ const BODY = {
     <div class="box"><p>지명·장소명 검색으로 전환하면</p><p>‘명동’ → 명동 기준 추천</p><p>장소명 → 해당 장소가 속한 지역 기준 추천</p><p>결과 예시: 르뱅헤어 · 명동 기준</p></div>`; },
 
   '06': () => {
-    const d = S.draft, q = S.search.query, types = TYPES[d.category] || [];
+    const d = S.draft, q = esc(S.search.query), types = TYPES[d.category] || [];
     return `
     <p class="lbl">추천 기준</p>
     <div class="box ${d.mode === 'keyword' ? 'sel' : ''}" data-a="fmode:keyword"><p>${d.mode === 'keyword' ? '(●)' : '( )'} 키워드 · ${q}</p><p>업소명·카테고리·업태 기준으로 추천</p></div>
@@ -90,10 +91,10 @@ const BODY = {
 
   '07': () => { const p = place(S.placeId), saved = S.saved.has(p.id), none = '정보 없음'; return `
     ${thumb(p, 'h')}
-    <p class="h1">${p.name}</p><p class="sub">${p.category} · ${p.type || '업태 정보 없음'}</p>
-    <div class="row">${[p.area, ...p.floors].filter(Boolean).map(t => `<span class="box" style="padding:3px 10px">${t}</span>`).join('')}</div>
+    <p class="h1">${esc(p.name)}</p><p class="sub">${esc(p.category)} · ${esc(p.type || '업태 정보 없음')}</p>
+    <div class="row">${[p.area, ...p.floors].filter(Boolean).map(t => `<span class="box" style="padding:3px 10px">${esc(t)}</span>`).join('')}</div>
     <hr>
-    <p class="lbl">장소 정보</p><div class="kv"><span>도로명</span><span>${p.address || none}</span><span>지번</span><span>${p.jibun || none}</span><span>지역</span><span>${p.area || none}</span><span>위치</span><span>${floorText(p)}</span></div>
+    <p class="lbl">장소 정보</p><div class="kv"><span>도로명</span><span>${esc(p.address || none)}</span><span>지번</span><span>${esc(p.jibun || none)}</span><span>지역</span><span>${esc(p.area || none)}</span><span>위치</span><span>${esc(floorText(p))}</span></div>
     ${tagsHtml(p)}
     <div class="detailmap" id="dmap" role="img" aria-label="장소 위치 지도">지도를 불러오는 중…</div>
     ${explainHtml(p)}

@@ -1,6 +1,6 @@
 /* js/data.js — 공통 헬퍼 · 장소 데이터 정규화 · 추천/검색 로직 */
 const D = window.APP_CONFIG;                 // data/config.json (boot.js가 먼저 불러옴)
-const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const $ = s => document.querySelector(s);
 const nickHint = v => {                      // 충족하지 못한 조건만 한 줄로
   const n = [...v].length, bad = [...v].filter(c => !/[가-힣A-Za-z0-9]/.test(c)).length, miss = [];
   if (n < 2 || n > 12) miss.push('2~12자');
@@ -19,7 +19,6 @@ const pwHint = v => {
 };
 const hintText = h => (h.ok ? '✓ ' : '') + h.text;
 const signupMissing = g => [!nickHint(g.nick).ok && '닉네임', !pwHint(g.pw).ok && '비밀번호', !(g.pw && g.pw === g.pw2) && '비밀번호 확인', !(g.terms && g.priv) && '약관 동의'].filter(Boolean);
-const signupOk = g => nickHint(g.nick).ok && pwHint(g.pw).ok && !!g.pw && g.pw === g.pw2 && g.terms && g.priv;
 const toggle = (a, v) => a.includes(v) ? a.filter(x => x !== v) : [...a, v];
 const countBy = (arr, f) => { const m = new Map(); arr.forEach(x => m.set(f(x), (m.get(f(x)) || 0) + 1)); return m; };
 const byCount = m => [...m.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]);
@@ -51,12 +50,12 @@ let S;
 function init() {
   const d = D.defaults;
   S = {
-    screen: '01', user: false, userKey: '', err: '', loginNick: '', popCat: '',
+    screen: '01', user: false, userKey: '', createdAt: 0, err: '', loginNick: '', popCat: '',
     area: d.area, search: { ...d.search }, applied: noFilter(), draft: null, nearCat: '',
     prefs: emptyPrefs(), pdraft: emptyPrefs(), settings: defaultSettings(), favCat: '',
     saved: new Set(), history: [],                                   // 비로그인: 저장·기록·취향 없음 (로그인하면 store.js 가 계정 데이터를 불러옴)
     after: null, pending: null,
-    shown: { home: 1, search: 1 },
+    shown: { search: 1 },
     placeId: null, from: '04', termsFrom: '03',
     login: { pw: '', show: false, busy: false, err: {} },
     signup: { nick: '', pw: '', pw2: '', terms: false, priv: false, state: 'idle', msg: '' },
@@ -65,10 +64,14 @@ function init() {
 }
 
 /* ───────── 추천·검색 로직 (취향 점수·추천 설명은 reco.js) ───────── */
-function recommend() {                     // 홈: 내 위치 기준 가까운 순 NEAR_N곳 (필터 선택 시 해당 카테고리 안에서, 로그인하면 검색 반경 안에서)
+function recommend(n = NEAR_N) {           // 홈: 상위 n곳 (필터 선택 시 해당 카테고리 안에서, 로그인하면 검색 반경 안에서)
   const R = S.user ? S.prefs.radius : 0;
-  return STORES.filter(p => pinPos(p) && (!S.nearCat || p.category === S.nearCat))
-    .map(p => ({ p, d: dist(ME, pinPos(p)) })).filter(o => !R || o.d <= R).sort((a, b) => a.d - b.d || a.p.id - b.p.id).slice(0, NEAR_N).map(o => o.p);
+  const near = STORES.filter(p => pinPos(p) && (!S.nearCat || p.category === S.nearCat))
+    .map(p => ({ p, d: dist(ME, pinPos(p)) })).filter(o => !R || o.d <= R);
+  if (!personal()) return near.sort((a, b) => a.d - b.d || a.p.id - b.p.id).slice(0, n).map(o => o.p);   // 비로그인·취향 동의 안 함: 가까운 순
+  const scored = near.map(o => ({ ...o, s: scoreOf(o.p) - (S.saved.has(o.p.id) ? RC.savedPenalty : 0) }))     // 이미 저장한 곳은 조금 아래로
+    .sort((a, b) => b.s - a.s || a.d - b.d);
+  return diversify(scored, n).map(o => o.p);                                                             // 취향·거리 맞춤순 + 카테고리 섞기
 }
 function searchStores() {                  // 검색: 키워드(업소명·카테고리·업태) / 지명·장소명(행정동·주소·업소명) + 적용 필터
   const q = S.search.query.trim(), f = S.applied;
@@ -78,5 +81,7 @@ function searchStores() {                  // 검색: 키워드(업소명·카�
     const ar = !f.area || (f.area === '__other' ? !TOP_AREAS.includes(p.area) : p.area === f.area);
     return hit && ar && (!f.category || p.category === f.category) && (!f.types.length || f.types.includes(p.type)) && (!f.floors.length || f.floors.some(x => p.floors.includes(x)));
   });
-  return personal() ? res.map(p => [p, scoreOf(p)]).sort((a, b) => b[1] - a[1]).map(o => o[0]) : res;     // 취향 일치 점수 높은 순 (동점은 기존 순서)
+  const near = (a, b) => (a === b ? 0 : a - b) || 0;                        // 좌표 없는 곳(Infinity)은 뒤로
+  return res.map(p => [p, scoreOf(p), meDist(p)])                            // 맞춤 추천: 취향·거리 점수 높은 순(동점은 가까운 순) / 그 외: 가까운 순
+    .sort((a, b) => b[1] - a[1] || near(a[2], b[2])).map(o => o[0]);
 }
